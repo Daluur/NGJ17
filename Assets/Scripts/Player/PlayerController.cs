@@ -2,6 +2,12 @@
 
 public sealed class PlayerController : MonoBehaviour
 {
+    [HideInInspector]
+    public AudioClip deathClip;
+
+    private SoundHolder soundHolder;
+    private AudioSource myAudioSource;
+
     private const int MAX_CONTACTS = 4;
 
     public float groundSpeed = 5f;
@@ -10,6 +16,7 @@ public sealed class PlayerController : MonoBehaviour
     public float wallJumpSpeed = 10f;
     public float groundAcceleration = 50f;
     public float airAcceleration = 30f;
+
     public float inputJumpEarlyBias = 0.1f;
     public float inputJumpLateBias = 0.1f;
     public float jumpMaxOvertime = 1f;
@@ -58,9 +65,7 @@ public sealed class PlayerController : MonoBehaviour
 			LobbySceneBackground.instance.GotKill();
 		}
         
-        var ps = GetComponentInChildren<ParticleSystem>();
-        ps.transform.parent = null;
-        ps.Play();
+        GetComponentInChildren<ParticleCollision>().ActivateParticleSystem();
         Destroy(gameObject);
     }
 
@@ -77,6 +82,12 @@ public sealed class PlayerController : MonoBehaviour
         jumpMaxOvertime = Mathf.Max(0, jumpMaxOvertime);
         groundAngle = Mathf.Max(0, groundAngle);
         wallAngle = Mathf.Max(0, wallAngle);
+    }
+
+    private void Start()
+    {
+        soundHolder = GetComponent<SoundHolder>();
+        myAudioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -155,7 +166,47 @@ public sealed class PlayerController : MonoBehaviour
 
         var directedVelocity = new Vector2(directedMoveX, directedMomentum.y);
         body2D.velocity = Rotate(directedVelocity, -normalAngle);
+
+        if (Mathf.Abs(directedMoveX) > 0.6f)
+            RunningSound();
+
+        body2D.velocity = new Vector2(move, body2D.velocity.y);
+        
     }
+
+    private void RunningSound() {
+        if (!myAudioSource.isPlaying) { 
+        myAudioSource.clip = soundHolder.running;
+        myAudioSource.Play();
+        myAudioSource.volume = 1;
+        }
+
+    }
+    private void JumpingSound()
+    {
+
+    }
+
+  /*  public void Kill() {
+		if (dead) {
+			return;
+		}
+
+        if (deathClip == null) {
+            deathClip = soundHolder.death;
+        }
+
+        GameHandler.instance.MuteCurrentPlayerMusic();
+        myAudioSource.clip = deathClip;
+        myAudioSource.Play();
+        
+        dead = true;
+		GameHandler.instance.PlayerGotKilled();
+        var ps = GetComponentInChildren<ParticleSystem>();
+        ps.transform.parent = null;
+        ps.Play();
+		Destroy(gameObject);
+	}*/
 
     private void UpdateJump()
     {

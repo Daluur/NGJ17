@@ -7,6 +7,7 @@ public class UIHandler : MonoBehaviour {
 
 	public PlayerPanel[] panels;
 	public Text WonText;
+	public Text powerUpText;
 
 	public void Setup(List<PlayerData> activePlayers) {
 		foreach (var i in activePlayers) {
@@ -15,7 +16,10 @@ public class UIHandler : MonoBehaviour {
 		}
 	}
 
-	public void PlayerUsedFuckYou(int i) {
+	public void PlayerUsedFuckYou(int i, string name, Color col) {
+		powerUpText.gameObject.SetActive(true);
+		powerUpText.text = name + " Altered gravity!";
+		StartCoroutine(Fade(powerUpText, 2, col));
 		panels[i - 1].UsedFuckYou();
 	}
 
@@ -30,8 +34,24 @@ public class UIHandler : MonoBehaviour {
 		}
 	}
 
-	public void Won(int id) {
-		WonText.text = "PLAYER " + id + " WON!";
+	public void Won(string name) {
+		WonText.text = name + " WON!";
 		WonText.gameObject.SetActive(true);
+	}
+
+	IEnumerator Fade(Text text, float time, Color col) {
+		Outline outline = text.gameObject.GetComponent<Outline>();
+		var startTime = time;
+		var initCol = text.color = col;
+		var outlineCol = Color.white;
+		while (time > 0) {
+			time -= Time.deltaTime;
+			initCol.a = Mathf.Lerp(0, 1, time / startTime);
+			outlineCol.a = initCol.a;
+			outline.effectColor = outlineCol;
+			text.color = initCol;
+			yield return new WaitForEndOfFrame();
+		}
+		powerUpText.gameObject.SetActive(false);
 	}
 }
