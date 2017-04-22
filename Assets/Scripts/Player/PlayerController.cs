@@ -2,18 +2,22 @@
 
 public sealed class PlayerController : MonoBehaviour
 {
+    private const int MAX_CONTACTS = 4;
+
     public float moveSpeed = 1f;
     public float jumpSpeed = 10f;
     public float moveAcceleration = 1f;
     public float inputJumpEarlyBias = 0.1f;
     public float inputJumpLateBias = 0.1f;
     public float jumpOvertimes = 1f;
-    public float contactBias = 0.1f;
+    public float groundAngle = 90;
 
+    private bool _grounded;
     private bool _dead;
     private bool _jumping;
     private float _moveDirection;
     private float _jumpInputTime = float.NegativeInfinity;
+    private Vector2 _groundNormal;
 
     public float MoveDirection
     {
@@ -26,14 +30,11 @@ public sealed class PlayerController : MonoBehaviour
         get { return _jumping; }
         set
         {
-            if (IsGrounded())
+            if (!_jumping && value)
             {
-                if (!_jumping && value)
-                {
-                    _jumpInputTime = Time.timeSinceLevelLoad;
-                }
-                _jumping = value;
+                _jumpInputTime = Time.timeSinceLevelLoad;
             }
+            _jumping = value;
         }
     }
 
@@ -59,6 +60,7 @@ public sealed class PlayerController : MonoBehaviour
     // Update is called once per frame
     private void FixedUpdate()
     {
+        UpdateGrounded();
         UpdateMove();
         UpdateJump();
     }
@@ -68,8 +70,12 @@ public sealed class PlayerController : MonoBehaviour
         var body2D = GetComponent<Rigidbody2D>();
 
         var momentum = body2D.velocity;
-        var normal = GetGroundNormal();
+        var normal = _groundNormal;
         var normalAngle = Vector2.Angle(Vector2.up, normal);
+        if (normal.x < 0)
+        {
+            normalAngle = -normalAngle;
+        }
 
         var directedMomentum = Rotate(momentum, normalAngle);
 
@@ -82,10 +88,9 @@ public sealed class PlayerController : MonoBehaviour
         body2D.velocity = Rotate(directedVelocity, -normalAngle);
     }
 
-
     private void UpdateJump()
     {
-        if (IsGrounded() &&
+        if (_grounded &&
             _jumpInputTime + inputJumpEarlyBias >= Time.timeSinceLevelLoad)
         {
             var body2D = GetComponent<Rigidbody2D>();
@@ -93,29 +98,27 @@ public sealed class PlayerController : MonoBehaviour
         }
     }
 
-    private bool IsGrounded ()
+    private void UpdateGrounded()
     {
+        _grounded = false;
+        _groundNormal = Vector2.up;
         var collider = GetComponent<BoxCollider2D>();
-        var hit = Physics2D.Raycast(transform.position, Vector2.down);
-        var closest = collider.bounds.ClosestPoint(hit.point);
-        if (Vector2.Distance(closest, hit.point) < contactBias)
+        var contacts = new ContactPoint2D[MAX_CONTACTS];
+        var contactAmount = collider.GetContacts(contacts);
+        if (contactAmount == 0)
         {
-            return true;
+            return;
         }
-        return false;
-    }
-
-    // Returns the upward vector for the player, used to determine move direction.
-    private Vector2 GetGroundNormal()
-    {
-        var collider = GetComponent<BoxCollider2D>();
-        var hit = Physics2D.Raycast(transform.position, Vector2.down);
-        var closest = collider.bounds.ClosestPoint(hit.point);
-        if (Vector2.Distance(closest, hit.point) < contactBias)
+        for (var i = 0; i < contactAmount; i++)
         {
-            return hit.normal;
+            var contactPoint = contacts[i];
+            var angle = Vector2.Angle(Vector2.up, contactPoint.normal);
+            if (angle < groundAngle)
+            {
+                _groundNormal = contactPoint.normal;
+                _grounded = true;
+            }
         }
-        return Vector2.up;
     }
 
     private static Vector2 Rotate(Vector2 v, float degrees)
