@@ -10,7 +10,7 @@ public class InputController : Singleton<InputController> {
 
 	int currentPlayerID;
 	Dictionary<int, PlayerController> currentPlayer = new Dictionary<int, PlayerController>();
-
+    [HideInInspector]
     public float reversePowerUpVar = 1f;
 
 	public bool keyboardInput = false;
