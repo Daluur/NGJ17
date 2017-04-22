@@ -11,6 +11,8 @@ public class InputController : Singleton<InputController> {
 
 	public bool keyboardInput = false;
 	bool startedInGameScene = false;
+	[HideInInspector]
+	public bool gameFinished = false;
 
 	public void Setup(List<int> activeConts, bool startInScene = false) {
 		activeControllers = activeConts;
@@ -27,6 +29,10 @@ public class InputController : Singleton<InputController> {
 	
 	// Update is called once per frame
 	void Update () {
+		if (gameFinished) {
+			ListenForStartButton();
+			return;
+		}
 		if (keyboardInput) {
 			GetKeyboardInput();
 		}
@@ -35,6 +41,7 @@ public class InputController : Singleton<InputController> {
 		}
 		else {
 			GetJoystickInput();
+			GetNonActivePlayerInput();
 		}
 	}
 
@@ -46,6 +53,29 @@ public class InputController : Singleton<InputController> {
 			Debug.Log("Jump up: " + currentPlayerID);
 		}
 		currentPlayer.MoveDirection = Input.GetAxis("Joy" + currentPlayerID + "X");
+	}
+
+	void GetNonActivePlayerInput() {
+		foreach (int i in activeControllers) {
+			if (currentPlayerID == i) {
+				continue;
+			}
+			if (Input.GetButtonDown("Joy" + i + "Jump")) {
+				Debug.Log("Not active player: "+i+" Pressed fuck you button");
+                GameHandler.instance.CanUseFuckYouPower(i);
+			}
+		}
+	}
+
+	void ListenForStartButton() {
+		if (Input.GetButtonDown("Start")) {
+			if (keyboardInput) {
+				UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+			}
+			else {
+				GameHandler.instance.ReturnToCharSelect();
+			}
+		}
 	}
 
 	/// <summary>

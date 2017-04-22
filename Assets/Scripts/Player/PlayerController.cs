@@ -5,6 +5,8 @@ public sealed class PlayerController : MonoBehaviour
     public float moveSpeed;
     public float moveAcceleration;
 
+	bool dead = false;
+
     public float MoveDirection
     {
         get { return _moveDirection; }
@@ -37,6 +39,10 @@ public sealed class PlayerController : MonoBehaviour
     }
 
 	public void Kill() {
+		if (dead) {
+			return;
+		}
+		dead = true;
 		GameHandler.instance.PlayerGotKilled();
         var ps = GetComponentInChildren<ParticleSystem>();
         ps.transform.parent = null;
