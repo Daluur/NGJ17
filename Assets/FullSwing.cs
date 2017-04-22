@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class FullSwing : MonoBehaviour {
 
+	public int speed;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -11,6 +13,6 @@ public class FullSwing : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		transform.Rotate (Vector3.forward * Time.deltaTime * 50);
+		transform.Rotate (Vector3.forward * Time.deltaTime * speed);
 	}
 }
