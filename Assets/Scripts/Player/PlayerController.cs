@@ -158,14 +158,12 @@ public sealed class PlayerController : MonoBehaviour
         float acceleration;
         if (_grounded || transform.parent != null)
         {
-            body2D.gravityScale = 0;
             normalAngle = Vector2.Angle(Vector2.up, _contactNormal);
             move = MoveDirection * groundSpeed;
             acceleration = groundAcceleration;
         }
         else
         {
-            body2D.gravityScale = 2.5f;
             acceleration = airAcceleration;
             normalAngle = 0f;
             if (MoveDirection == 0)
@@ -183,7 +181,9 @@ public sealed class PlayerController : MonoBehaviour
         }
 
         var directedMomentum = Rotate(momentum, normalAngle);
-        
+
+        Debug.Log(momentum.x + " " + move + " " + acceleration);
+
         var directedMoveX = Mathf.MoveTowards(momentum.x, move, acceleration * Time.fixedDeltaTime);
 
         var directedVelocity = new Vector2(directedMoveX, directedMomentum.y);
