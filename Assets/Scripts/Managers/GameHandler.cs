@@ -1,43 +1,82 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameHandler : Singleton<GameHandler> {
 
 	int currentPlayer;
-	List<int> players;
+	List<PlayerData> players;
 
 	public GameObject[] avatars;
 
 	public Transform spawnPoint;
 
+	public GameObject UIObjectprefab;
+	UIHandler ui;
+
+	bool gameFinished = false;
+
 	void Start() {
 		if(CrossSceneData.Instance.GetActiveControllers() == null) {
-			StartGame(new List<int>() { 1 }, true);
+			StartGame(new List<PlayerData>() { new PlayerData(1, Color.red) }, true);
 		}
 		else{
-			StartGame(CrossSceneData.Instance.GetActiveControllers());
+			StartGame(CrossSceneData.Instance.GetPlayerData());
 		}
+		ui = Instantiate(UIObjectprefab).GetComponent<UIHandler>();
+		ui.Setup(players);
+		ui.NewPlayersTurn(players[currentPlayer].ID);
 	}
 
-	public void StartGame(List<int> playerNums, bool faked = false) {
+	public void StartGame(List<PlayerData> playerNums, bool faked = false) {
 		players = playerNums;
 		currentPlayer = 0;
-		InputController.instance.Setup(players, faked);
+		List<int> i = new List<int>();
+		foreach (var player in players) {
+			i.Add(player.ID);
+		}
+		InputController.instance.Setup(i, faked);
 		SpawnPlayer();
 	}
 
 	public void PlayerGotKilled() {
+		if (gameFinished) {
+			return;
+		}
 		currentPlayer++;
 		if(currentPlayer > players.Count - 1) {
 			currentPlayer = 0;
 		}
 		SpawnPlayer();
+		ui.NewPlayersTurn(players[currentPlayer].ID);
 	}
 
 	void SpawnPlayer() {
-		GameObject temp = Instantiate(avatars[players[currentPlayer]-1], spawnPoint.position, Quaternion.identity) as GameObject;
-		InputController.instance.AssignNewPlayer(players[currentPlayer], temp.GetComponent<PlayerController>());
+		GameObject temp = Instantiate(avatars[players[currentPlayer].ID-1], spawnPoint.position, Quaternion.identity) as GameObject;
+		InputController.instance.AssignNewPlayer(players[currentPlayer].ID, temp.GetComponent<PlayerController>());
+	}
+
+	public bool CanUseFuckYouPower(int id) {
+		foreach (var p in players) {
+			if(p.ID == id) {
+				if (p.usedFuckYouPower) {
+					return false;
+				}
+				else {
+					p.usedFuckYouPower = true;
+					ui.PlayerUsedFuckYou(p.ID);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void GameWon() {
+		gameFinished = true;
+		Debug.LogError("PLAYER " + players[currentPlayer] + " WON!");
+		SceneManager.LoadScene(0);
 	}
 
 }

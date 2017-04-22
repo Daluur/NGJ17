@@ -35,6 +35,7 @@ public class InputController : Singleton<InputController> {
 		}
 		else {
 			GetJoystickInput();
+			GetNonActivePlayerInput();
 		}
 	}
 
@@ -46,6 +47,20 @@ public class InputController : Singleton<InputController> {
 			Debug.Log("Jump up: " + currentPlayerID);
 		}
 		currentPlayer.MoveDirection = Input.GetAxis("Joy" + currentPlayerID + "X");
+	}
+
+	void GetNonActivePlayerInput() {
+		foreach (int i in activeControllers) {
+			if (currentPlayerID == i) {
+				continue;
+			}
+			if (Input.GetButtonDown("Joy" + i + "Jump")) {
+				Debug.Log("Not active player: "+i+" Pressed fuck you button");
+				if (GameHandler.instance.CanUseFuckYouPower(i)) {
+					currentPlayer.Kill();
+				}
+			}
+		}
 	}
 
 	/// <summary>
