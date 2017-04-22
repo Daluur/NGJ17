@@ -25,12 +25,10 @@ public class ControllerAssigning : MonoBehaviour {
 				if (activeControllers.Contains(i)) {
 					activeControllers.Remove(i);
 					RemoveAvatar(i);
-					Debug.Log("removed " + i);
 				}
 				else {
 					activeControllers.Add(i);
 					ShowAvatar(i);
-					Debug.Log("added " + i);
 				}
 			}
 		}
@@ -39,7 +37,6 @@ public class ControllerAssigning : MonoBehaviour {
 				Debug.Log("needs atleast 1 to start!");
 				return;
 			}
-			Debug.Log("Started game!");
 			activeControllers.Sort();
 			CrossSceneData.Instance.SetActiveControllers(activeControllers);
 			SceneManager.LoadScene(map);
@@ -77,5 +74,9 @@ public class ControllerAssigning : MonoBehaviour {
 
 	public void MapToggle(int i) {
 		map = i+1;
+	}
+
+	public void Quit() {
+		Application.Quit();
 	}
 }

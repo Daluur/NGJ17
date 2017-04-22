@@ -34,8 +34,9 @@ public class UIHandler : MonoBehaviour {
 		}
 	}
 
-	public void Won(string name) {
+	public void Won(string name, Color col) {
 		WonText.text = name + " WON!";
+		WonText.color = col;
 		WonText.gameObject.SetActive(true);
 	}
 
