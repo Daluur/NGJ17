@@ -129,5 +129,22 @@ public class GameHandler : Singleton<GameHandler> {
 		returningToCharSelect = true;
 		SceneManager.LoadScene(0);
 	}
+}
 
+public static class IncrementerForParticles {
+    private static int currentIncrement = 1;
+    private static bool locked;
+    public static int GetCurrentAndIncrement()
+    {
+        if (locked)
+            return currentIncrement;
+        locked = true;
+        currentIncrement++;
+        GameHandler.instance.StartCoroutine(CoolDown());
+        return currentIncrement;
+    }
+    public static IEnumerator CoolDown() {
+        yield return new WaitForSeconds(ParticleSystemConstants.TIMEBEFOREDESTRUCTION);
+        locked = false;
+    }
 }
