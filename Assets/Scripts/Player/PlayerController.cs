@@ -4,6 +4,11 @@ public sealed class PlayerController : MonoBehaviour
 {
     public float moveSpeed;
     public float moveAcceleration;
+    [HideInInspector]
+    public AudioClip deathClip;
+
+    private SoundHolder soundHolder;
+    private AudioSource myAudioSource;
 
 	bool dead = false;
 
@@ -20,6 +25,12 @@ public sealed class PlayerController : MonoBehaviour
         moveSpeed = Mathf.Max(0, moveSpeed);
     }
 
+    private void Start()
+    {
+        soundHolder = GetComponent<SoundHolder>();
+        myAudioSource = GetComponent<AudioSource>();
+    }
+
 	// Update is called once per frame
 	private void FixedUpdate()
     {
@@ -33,16 +44,42 @@ public sealed class PlayerController : MonoBehaviour
         }
         var acc = moveAcceleration * Time.fixedTime;
 
-        move = Mathf.MoveTowards(move, MoveDirection * moveSpeed, acc);
+        if (Mathf.Abs(move) > 0.6f)
+            RunningSound();
 
+        move = Mathf.MoveTowards(move, MoveDirection * moveSpeed, acc);
+        
         body2D.velocity = new Vector2(move, body2D.velocity.y);
+        
     }
 
-	public void Kill() {
+    private void RunningSound() {
+        if (!myAudioSource.isPlaying) { 
+        myAudioSource.clip = soundHolder.running;
+        myAudioSource.Play();
+        myAudioSource.volume = 1;
+        }
+
+    }
+    private void JumpingSound()
+    {
+
+    }
+
+    public void Kill() {
 		if (dead) {
 			return;
 		}
-		dead = true;
+
+       /* if (deathClip == null) {
+            deathClip = soundHolder.death;
+        }
+
+        GameHandler.instance.MuteCurrentPlayerMusic();
+        myAudioSource.clip = deathClip;
+        myAudioSource.Play();
+        */
+        dead = true;
 		GameHandler.instance.PlayerGotKilled();
         var ps = GetComponentInChildren<ParticleSystem>();
         ps.transform.parent = null;

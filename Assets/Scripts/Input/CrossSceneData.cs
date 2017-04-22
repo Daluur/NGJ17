@@ -45,6 +45,7 @@ public class PlayerData {
 	public bool usedFuckYouPower = false;
 	public Color color;
     public PowerUp powerUp;
+    public AudioSource audioSource;
 
 	public PlayerData(int i, Color col) {
 		ID = i;
