@@ -18,7 +18,7 @@ public class KillOnHit : MonoBehaviour {
 	}
     private void Update()
     {
-        if (!GetComponent<AudioSource>().isPlaying) {
+        if (!GetComponent<AudioSource>().isPlaying && environmentalSound!=null) {
             GetComponent<AudioSource>().clip = environmentalSound;
             GetComponent<AudioSource>().loop = true;
             GetComponent<AudioSource>().Play();
