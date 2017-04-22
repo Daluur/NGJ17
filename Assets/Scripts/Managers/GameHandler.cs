@@ -201,11 +201,13 @@ public class GameHandler : Singleton<GameHandler> {
 		SceneManager.LoadScene(0);
 	}
 
-	public void PlayerHitCheckpoint(PlayerController cont) {
+	public int PlayerHitCheckpoint(PlayerController cont) {
 		int i = InputController.instance.GetIDFromController(cont);
 		if (!playerReachedCheckpoint.Contains(i)) {
 			playerReachedCheckpoint.Add(i);
+			return i;
 		}
+		return 0;
 	}
 }
 
