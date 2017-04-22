@@ -185,7 +185,6 @@ public sealed class PlayerController : MonoBehaviour
         var directedMoveX = Mathf.MoveTowards(directedMomentum.x, move, acceleration * Time.fixedDeltaTime);
 
         var directedVelocity = new Vector2(directedMoveX, directedMomentum.y);
-        Debug.Log(directedMomentum.x + " -> " + directedVelocity.x);
         body2D.velocity = Rotate(directedVelocity, -normalAngle);
 
         if (Mathf.Abs(directedMoveX) > 0.6f)
