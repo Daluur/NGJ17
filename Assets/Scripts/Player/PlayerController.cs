@@ -4,20 +4,26 @@ public sealed class PlayerController : MonoBehaviour
 {
     private const int MAX_CONTACTS = 4;
 
-    public float moveSpeed = 1f;
-    public float jumpSpeed = 10f;
-    public float moveAcceleration = 1f;
+    public float groundSpeed = 5f;
+    public float airSpeed = 5f;
+    public float groundJumpSpeed = 10f;
+    public float wallJumpSpeed = 10f;
+    public float groundAcceleration = 50f;
+    public float airAcceleration = 30f;
     public float inputJumpEarlyBias = 0.1f;
     public float inputJumpLateBias = 0.1f;
-    public float jumpOvertimes = 1f;
-    public float groundAngle = 90;
+    public float jumpMaxOvertime = 1f;
+    public float groundAngle = 60;
+    public float wallAngle = 100;
 
-    private bool _grounded;
     private bool _dead;
     private bool _jumping;
+    private bool _grounded;
     private float _moveDirection;
     private float _jumpInputTime = float.NegativeInfinity;
-    private Vector2 _groundNormal;
+    private float _lastGroundedTime = float.NegativeInfinity;
+    private float _lastClimbingTime = float.NegativeInfinity;
+    private Vector2 _contactNormal;
 
     public float MoveDirection
     {
@@ -60,55 +66,33 @@ public sealed class PlayerController : MonoBehaviour
 
     private void OnValidate()
     {
-        moveSpeed = Mathf.Max(0, moveSpeed);
+        groundSpeed = Mathf.Max(0, groundSpeed);
+        airSpeed = Mathf.Max(0, airSpeed);
+        groundAcceleration = Mathf.Max(0, groundAcceleration);
+        airAcceleration = Mathf.Max(0, airAcceleration);
+        groundJumpSpeed = Mathf.Max(0, groundJumpSpeed);
+        wallJumpSpeed = Mathf.Max(0, wallJumpSpeed);
+        inputJumpEarlyBias = Mathf.Max(0, inputJumpEarlyBias);
+        inputJumpLateBias = Mathf.Max(0, inputJumpLateBias);
+        jumpMaxOvertime = Mathf.Max(0, jumpMaxOvertime);
+        groundAngle = Mathf.Max(0, groundAngle);
+        wallAngle = Mathf.Max(0, wallAngle);
     }
 
     // Update is called once per frame
     private void FixedUpdate()
     {
-        UpdateGrounded();
-        UpdateMove();
+        UpdateCollision();
         UpdateJump();
+        UpdateMove();
     }
 
-    private void UpdateMove()
-    {
-        var body2D = GetComponent<Rigidbody2D>();
-
-        var momentum = body2D.velocity;
-        var normal = _groundNormal;
-        var normalAngle = Vector2.Angle(Vector2.up, normal);
-        if (normal.x < 0)
-        {
-            normalAngle = -normalAngle;
-        }
-
-        var directedMomentum = Rotate(momentum, normalAngle);
-
-        var move = MoveDirection * moveSpeed;
-        var acceleration = moveAcceleration * Time.fixedTime;
-
-        var directedMoveX = Mathf.MoveTowards(momentum.x, move, acceleration);
-
-        var directedVelocity = new Vector2(directedMoveX, directedMomentum.y);
-        body2D.velocity = Rotate(directedVelocity, -normalAngle);
-    }
-
-    private void UpdateJump()
-    {
-        if (_grounded &&
-            _jumpInputTime + inputJumpEarlyBias >= Time.timeSinceLevelLoad)
-        {
-            var body2D = GetComponent<Rigidbody2D>();
-            body2D.velocity = new Vector2(body2D.velocity.x, jumpSpeed);
-        }
-    }
-
-    private void UpdateGrounded()
+    private void UpdateCollision()
     {
         _grounded = false;
-        _groundNormal = Vector2.up;
-        var collider = GetComponent<BoxCollider2D>();
+        var time = Time.timeSinceLevelLoad;
+        _contactNormal = Vector2.up;
+        var collider = GetComponent<Collider2D>();
         var contacts = new ContactPoint2D[MAX_CONTACTS];
         var contactAmount = collider.GetContacts(contacts);
         if (contactAmount == 0)
@@ -119,12 +103,90 @@ public sealed class PlayerController : MonoBehaviour
         {
             var contactPoint = contacts[i];
             var angle = Vector2.Angle(Vector2.up, contactPoint.normal);
-            if (angle < groundAngle)
+            if (angle < wallAngle)
             {
-                _groundNormal = contactPoint.normal;
-                _grounded = true;
+                _contactNormal = contactPoint.normal;
+                _lastClimbingTime = time;
+                if (angle < groundAngle)
+                {
+                    _grounded = true;
+                    _lastGroundedTime = time;
+                }
             }
         }
+    }
+
+    private void UpdateMove()
+    {
+        var body2D = GetComponent<Rigidbody2D>();
+
+        var momentum = body2D.velocity;
+        float normalAngle;
+        float move;
+        float acceleration;
+        if (_grounded)
+        {
+            normalAngle = Vector2.Angle(Vector2.up, _contactNormal);
+            move = MoveDirection * groundSpeed;
+            acceleration = groundAcceleration;
+        }
+        else
+        {
+            acceleration = airAcceleration;
+            normalAngle = 0f;
+            if (MoveDirection == 0)
+            {
+                move = momentum.x;
+            }
+            else
+            {
+                move = MoveDirection * Mathf.Max(Mathf.Sign(MoveDirection) * momentum.x, airSpeed);
+            }
+        }
+        if (_contactNormal.x < 0)
+        {
+            normalAngle = -normalAngle;
+        }
+
+        var directedMomentum = Rotate(momentum, normalAngle);
+
+        
+        var directedMoveX = Mathf.MoveTowards(momentum.x, move, acceleration * Time.fixedDeltaTime);
+
+        var directedVelocity = new Vector2(directedMoveX, directedMomentum.y);
+        body2D.velocity = Rotate(directedVelocity, -normalAngle);
+    }
+
+    private void UpdateJump()
+    {
+        var time = Time.timeSinceLevelLoad;
+        if (_jumpInputTime + inputJumpEarlyBias < time)
+        {
+            return;
+        }
+
+        var body2D = GetComponent<Rigidbody2D>();
+        var momentum = body2D.velocity;
+        var jump = Vector2.zero;
+        if (_lastGroundedTime + inputJumpLateBias > Time.timeSinceLevelLoad)
+        {
+            jump = Vector2.up * groundJumpSpeed;
+            ResetJump();
+        }
+        else if (_lastClimbingTime + inputJumpLateBias > Time.timeSinceLevelLoad)
+        {
+            jump = new Vector2(Mathf.Sign(_contactNormal.x), 1).normalized * wallJumpSpeed;
+            ResetJump();
+        }
+        body2D.velocity += jump;
+    }
+
+    private void ResetJump()
+    {
+        _jumpInputTime = float.NegativeInfinity;
+        _lastGroundedTime = float.NegativeInfinity;
+        _lastClimbingTime = float.NegativeInfinity;
+        _grounded = false;
     }
 
     private static Vector2 Rotate(Vector2 v, float degrees)
