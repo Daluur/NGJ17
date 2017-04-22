@@ -34,6 +34,7 @@ public class ControllerAssigning : MonoBehaviour {
 				return;
 			}
 			Debug.Log("Started game!");
+			activeControllers.Sort();
 			CrossSceneData.Instance.SetActiveControllers(activeControllers);
 			SceneManager.LoadScene(1);
 		}
