@@ -28,6 +28,7 @@ public sealed class PlayerController : MonoBehaviour
     private bool _grounded;
     private float _moveDirection;
     private float _jumpInputTime = float.NegativeInfinity;
+    private float _jumpOvertimeTime = float.NegativeInfinity;
     private float _lastGroundedTime = float.NegativeInfinity;
     private float _lastClimbingTime = float.NegativeInfinity;
     private Vector2 _contactNormal;
@@ -46,6 +47,10 @@ public sealed class PlayerController : MonoBehaviour
             if (!_jumping && value)
             {
                 _jumpInputTime = Time.timeSinceLevelLoad;
+            }
+            else if (!value)
+            {
+                _jumpOvertimeTime = float.NegativeInfinity;
             }
             _jumping = value;
         }
@@ -168,68 +173,59 @@ public sealed class PlayerController : MonoBehaviour
         body2D.velocity = Rotate(directedVelocity, -normalAngle);
 
         if (Mathf.Abs(directedMoveX) > 0.6f)
+        {
             RunningSound();
-
-        body2D.velocity = new Vector2(move, body2D.velocity.y);
-        
+        }
     }
 
-    private void RunningSound() {
-        if (!myAudioSource.isPlaying) { 
+    private void RunningSound()
+    {
+        if (!myAudioSource.isPlaying)
+        { 
         myAudioSource.clip = soundHolder.running;
         myAudioSource.Play();
         myAudioSource.volume = 1;
         }
-
     }
+
     private void JumpingSound()
     {
 
     }
 
-  /*  public void Kill() {
-		if (dead) {
-			return;
-		}
-
-        if (deathClip == null) {
-            deathClip = soundHolder.death;
-        }
-
-        GameHandler.instance.MuteCurrentPlayerMusic();
-        myAudioSource.clip = deathClip;
-        myAudioSource.Play();
-        
-        dead = true;
-		GameHandler.instance.PlayerGotKilled();
-        var ps = GetComponentInChildren<ParticleSystem>();
-        ps.transform.parent = null;
-        ps.Play();
-		Destroy(gameObject);
-	}*/
-
     private void UpdateJump()
     {
         var time = Time.timeSinceLevelLoad;
-        if (_jumpInputTime + inputJumpEarlyBias < time)
+        var isJumpFlag = _jumpInputTime + inputJumpEarlyBias > time;
+        var isOvertimeFlag = _jumpOvertimeTime + jumpMaxOvertime > time;
+        if (!isJumpFlag && !isOvertimeFlag)
         {
             return;
         }
 
         var body2D = GetComponent<Rigidbody2D>();
         var momentum = body2D.velocity;
-        var jump = Vector2.zero;
-        if (_lastGroundedTime + inputJumpLateBias > Time.timeSinceLevelLoad || transform.parent != null)
+        var jump = momentum;
+        if (((_lastGroundedTime + inputJumpLateBias > Time.timeSinceLevelLoad || transform.parent != null) && isJumpFlag) ||
+            isOvertimeFlag)
         {
-            jump = Vector2.up * groundJumpSpeed;
+            jump = new Vector2(momentum.x, groundJumpSpeed);
             ResetJump();
+            if (isJumpFlag)
+            {
+                _jumpOvertimeTime = time;
+            }
         }
-        else if (_lastClimbingTime + inputJumpLateBias > Time.timeSinceLevelLoad)
+        else if (_lastClimbingTime + inputJumpLateBias > Time.timeSinceLevelLoad && isJumpFlag)
         {
             jump = new Vector2(Mathf.Sign(_contactNormal.x), 1).normalized * wallJumpSpeed;
             ResetJump();
+            if (isJumpFlag)
+            {
+                _jumpOvertimeTime = time;
+            }
         }
-        body2D.velocity += jump;
+        body2D.velocity = jump;
     }
 
     private void ResetJump()
