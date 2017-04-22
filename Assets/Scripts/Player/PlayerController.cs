@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public sealed class PlayerController : MonoBehaviour
 {
@@ -64,7 +65,7 @@ public sealed class PlayerController : MonoBehaviour
         }
         _dead = true;
 		if(GameHandler.instance != null) {
-			GameHandler.instance.PlayerGotKilled();
+			GameHandler.instance.PlayerGotKilled(this);
 		}
 		else {
 			LobbySceneBackground.instance.GotKill();
@@ -111,6 +112,8 @@ public sealed class PlayerController : MonoBehaviour
         var collider = GetComponent<Collider2D>();
         var contacts = new ContactPoint2D[MAX_CONTACTS];
         var contactAmount = collider.GetContacts(contacts);
+        var groundNormals = new List<Vector2>();
+        var wallNormals = new List<Vector2>();
         if (contactAmount == 0)
         {
             return;
@@ -119,16 +122,29 @@ public sealed class PlayerController : MonoBehaviour
         {
             var contactPoint = contacts[i];
             var angle = Vector2.Angle(Vector2.up, contactPoint.normal);
-            if (angle < wallAngle)
+            if (angle < groundAngle)
             {
-                _contactNormal = contactPoint.normal;
-                _lastClimbingTime = time;
-                if (angle < groundAngle)
-                {
-                    _grounded = true;
-                    _lastGroundedTime = time;
-                }
+                groundNormals.Add(contactPoint.normal);
+                _grounded = true;
+                _lastGroundedTime = time;
             }
+            else if (angle < wallAngle)
+            {
+                wallNormals.Add(contactPoint.normal);
+                _lastClimbingTime = time;
+            }
+            else
+            {
+                _jumpOvertimeTime = float.NegativeInfinity;
+            }
+        }
+        if (groundNormals.Count > 0)
+        {
+            _contactNormal = AverageNormal(groundNormals.ToArray());
+        }
+        else if (wallNormals.Count > 0)
+        {
+            _contactNormal = AverageNormal(wallNormals.ToArray());
         }
     }
 
@@ -142,12 +158,14 @@ public sealed class PlayerController : MonoBehaviour
         float acceleration;
         if (_grounded || transform.parent != null)
         {
+            body2D.gravityScale = 0;
             normalAngle = Vector2.Angle(Vector2.up, _contactNormal);
             move = MoveDirection * groundSpeed;
             acceleration = groundAcceleration;
         }
         else
         {
+            body2D.gravityScale = 2.5f;
             acceleration = airAcceleration;
             normalAngle = 0f;
             if (MoveDirection == 0)
@@ -165,7 +183,6 @@ public sealed class PlayerController : MonoBehaviour
         }
 
         var directedMomentum = Rotate(momentum, normalAngle);
-
         
         var directedMoveX = Mathf.MoveTowards(momentum.x, move, acceleration * Time.fixedDeltaTime);
 
@@ -234,6 +251,18 @@ public sealed class PlayerController : MonoBehaviour
         _lastGroundedTime = float.NegativeInfinity;
         _lastClimbingTime = float.NegativeInfinity;
         _grounded = false;
+    }
+
+    private static Vector2 AverageNormal(Vector2[] vectors)
+    {
+        var x = 0f;
+        var y = 0f;
+        foreach (var vector in vectors)
+        {
+            x += vector.x;
+            y += vector.y;
+        }
+        return new Vector2(x / vectors.Length, y / vectors.Length).normalized;
     }
 
     private static Vector2 Rotate(Vector2 v, float degrees)
