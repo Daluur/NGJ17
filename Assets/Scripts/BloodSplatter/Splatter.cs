@@ -16,7 +16,7 @@ public class Splatter : MonoBehaviour
     private void Start()
     {
         spriteRenderer.sprite = sprites[Random.Range(0, sprites.Count)];
-        spriteRenderer.color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
+        //spriteRenderer.color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
         //transform.rotation = Quaternion.Euler(0, 0, Random.Range(0, 360));
     }
 }

@@ -26,7 +26,7 @@ public class ParticleCollision : MonoBehaviour
     private void OnParticleCollision(GameObject other)
     {
         List<ParticleCollisionEvent> tmp = new List<ParticleCollisionEvent>();
-        Debug.Log(other.name);
+        //Debug.Log(other.name);
         ParticlePhysicsExtensions.GetCollisionEvents(ps, other, tmp);
         //ParticlePhysicsExtensions.GetCollisionEvents(gameObject, tmp);
         Transform toParent = other.transform;
@@ -35,7 +35,7 @@ public class ParticleCollision : MonoBehaviour
         {
             //particleHolder.Add(new ParticleHolder(particle.intersection, transform));
             var go = (GameObject)Instantiate(splatter, particle.intersection, Quaternion.Euler(0,0,0));
-            Debug.Log(particle.intersection);
+            //Debug.Log(particle.intersection);
             go.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             go.GetComponent<SpriteRenderer>().sortingOrder = toParent.GetComponent<SpriteRenderer>().sortingOrder + 1;
             go.GetComponent<SpriteRenderer>().sortingLayerName = toParent.GetComponent<SpriteRenderer>().sortingLayerName;
