@@ -41,6 +41,9 @@ public class GameHandler : Singleton<GameHandler> {
 	}
 
 	public void PlayerGotKilled() {
+		if (Camera.main.GetComponent<Shaker>() != null) {
+			Camera.main.GetComponent<Shaker>().DoShake();
+		}
 		if (gameFinished) {
 			return;
 		}
