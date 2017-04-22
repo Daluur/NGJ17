@@ -40,8 +40,8 @@ public class CrossSceneData {
 		return playerInfo;
 	}
 
-	public Color[] colors = new Color[] { Color.red, Color.yellow, Color.green, Color.blue };
-	public string[] names = new string[] { "Red", "Yellow", "Green", "Blue" };
+	public Color[] colors = new Color[] { Color.red, Color.magenta, Color.green, Color.cyan };
+	public string[] names = new string[] { "Red", "Pink", "Green", "Blue" };
 }
 
 public class PlayerData {
@@ -58,6 +58,6 @@ public class PlayerData {
 		name = n;
         powerUp[0] = new IncreaseGravity();
         powerUp[1] = new ReverseMovement();
-        powerUp[2] = new HidePaintFromPlayer();
+        powerUp[2] = new HideTheAvatar();
     }
 }

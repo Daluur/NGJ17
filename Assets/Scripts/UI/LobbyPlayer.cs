@@ -14,7 +14,7 @@ public class LobbyPlayer : MonoBehaviour {
 	}
 
 	public void UnAssign() {
-		GetComponent<Image>().color = Color.black;
+		GetComponent<Image>().color = Color.white;
 		joinText.SetActive(true);
 	}
 }

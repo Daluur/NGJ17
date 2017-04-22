@@ -69,7 +69,6 @@ public class GameHandler : Singleton<GameHandler> {
 
         audioSources = GetComponents<AudioSource>();
         int i = 0;
-        Debug.Log("here");
         foreach (var player in players)
         {
             player.audioSource = audioSources[i];
