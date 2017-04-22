@@ -113,7 +113,6 @@ public sealed class PlayerController : MonoBehaviour
         {
             var contactPoint = contacts[i];
             var angle = Vector2.Angle(Vector2.up, contactPoint.normal);
-            Debug.Log(angle);
             if (angle < groundAngle)
             {
                 _groundNormal = contactPoint.normal;
