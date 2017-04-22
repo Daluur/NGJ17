@@ -2,36 +2,36 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Swing : MonoBehaviour {
+public sealed class Swing : MonoBehaviour
+{
+    public float swingDuration = 3f;
+    public float swingAngle = 80f;
 
-	bool leftswing;
-	bool rightswing;
-	float rotationAlign;
+	private bool leftSwing = true;
+    private float swingStart;
 
-	// Use this for initialization
-	void Start () {
-		leftswing = true;
-		rightswing = false;
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		rotationAlign = transform.eulerAngles.z;
+    private void Start()
+    {
+        swingStart = Time.timeSinceLevelLoad;
+    }
 
-		if (rightswing) {
-			transform.Rotate (Vector3.forward * Time.deltaTime * 50);
-		}
-		if (leftswing) {
-			transform.Rotate (Vector3.forward * Time.deltaTime * -50);
-		}
+    private void Update()
+    {
+        var time = Time.timeSinceLevelLoad;
+        var duration = time - swingStart;
+        var t = duration / swingDuration;
+        
+        float angle = Mathf.Cos(Mathf.PI * t) * swingAngle;
+        if (!leftSwing)
+        {
+            angle *= -1;
+        }
+        transform.rotation = Quaternion.Euler(0, 0, angle);
 
-		if (rightswing && rotationAlign > 80 && rotationAlign < 200) {
-			rightswing = false;
-			leftswing = true;
-		}
-		if (leftswing && rotationAlign < 280 && rotationAlign > 260) {
-			leftswing = false;
-			rightswing = true;
-		}
+        if (duration >= swingDuration)
+        {
+            swingStart = time;
+            leftSwing = !leftSwing;
+        }
 	}
 }
