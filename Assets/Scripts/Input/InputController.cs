@@ -116,6 +116,7 @@ public class InputController : Singleton<InputController> {
 		}
 		currentPlayer.MoveDirection = direction;
         currentPlayer.Jumping = Input.GetKey(KeyCode.W);
+		GameHandler.instance.CanUseFuckYouPower(1, currentPlayer);
 	}
 
 	/*foreach (int i in activeControllers) {

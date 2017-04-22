@@ -29,7 +29,7 @@ public class CrossSceneData {
 		activeControllers = conts;
 		playerInfo.Clear();
 		foreach (int i in activeControllers) {
-			playerInfo.Add(new PlayerData(i, colors[i-1]));
+			playerInfo.Add(new PlayerData(i, colors[i-1],names[i-1]));
 		}
 	}	
 
@@ -38,6 +38,7 @@ public class CrossSceneData {
 	}
 
 	public Color[] colors = new Color[] { Color.red, Color.yellow, Color.green, Color.blue };
+	public string[] names = new string[] { "Red", "Yellow", "Green", "Blue" };
 }
 
 public class PlayerData {
@@ -45,10 +46,12 @@ public class PlayerData {
 	public bool usedFuckYouPower = false;
 	public Color color;
     public PowerUp powerUp;
+	public string name;
 
-	public PlayerData(int i, Color col) {
+	public PlayerData(int i, Color col, string n) {
 		ID = i;
 		color = col;
+		name = n;
         powerUp = new IncreaseGravity();
 	}
 }

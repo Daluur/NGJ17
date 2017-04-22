@@ -19,7 +19,7 @@ public class GameHandler : Singleton<GameHandler> {
 
 	void Start() {
 		if(CrossSceneData.Instance.GetActiveControllers() == null) {
-			StartGame(new List<PlayerData>() { new PlayerData(1, Color.red) }, true);
+			StartGame(new List<PlayerData>() { new PlayerData(1, Color.red, "RED") }, true);
 		}
 		else{
 			StartGame(CrossSceneData.Instance.GetPlayerData());
@@ -65,7 +65,7 @@ public class GameHandler : Singleton<GameHandler> {
 				}
 				else {
 					p.usedFuckYouPower = true;
-					ui.PlayerUsedFuckYou(p.ID);
+					ui.PlayerUsedFuckYou(p.ID, p.name, p.color);
                     p.powerUp.UsePowerUp(currentPlayer);
 					return;
 				}
@@ -77,7 +77,7 @@ public class GameHandler : Singleton<GameHandler> {
 	public void GameWon() {
 		gameFinished = true;
 		InputController.instance.gameFinished = true;
-		ui.Won(players[currentPlayer].ID);
+		ui.Won(players[currentPlayer].name);
 	}
 
 	bool returningToCharSelect = false;
