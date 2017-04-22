@@ -8,7 +8,7 @@ public class PlayerPanel : MonoBehaviour {
 	public Image icon;
 	public Text numberText;
 	public GameObject currentTurn;
-	public GameObject hasFuckYou;
+	public GameObject[] hasFuckYou = new GameObject[3];
 
 	public void Setup(Color col, int number) {
 		numberText.text = number.ToString();
@@ -23,7 +23,7 @@ public class PlayerPanel : MonoBehaviour {
 		currentTurn.SetActive(false);
 	}
 
-	public void UsedFuckYou() {
-		hasFuckYou.SetActive(false);
+	public void UsedFuckYou(int ID) {
+		hasFuckYou[ID].SetActive(false);
 	}
 }
