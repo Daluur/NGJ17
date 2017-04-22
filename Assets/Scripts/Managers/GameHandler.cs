@@ -140,7 +140,12 @@ public static class IncrementerForParticles {
             return currentIncrement;
         locked = true;
         currentIncrement++;
-        GameHandler.instance.StartCoroutine(CoolDown());
+		if (GameHandler.instance == null) {
+			LobbySceneBackground.instance.StartCoroutine(CoolDown());
+		}
+		else {
+			GameHandler.instance.StartCoroutine(CoolDown());
+		}
         return currentIncrement;
     }
     public static IEnumerator CoolDown() {

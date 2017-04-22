@@ -20,6 +20,9 @@ public class InputController : Singleton<InputController> {
 			startedInGameScene = true;
 			activeControllers = new List<int>() { 1, 2, 3, 4 };
 		}
+		else {
+			keyboardInput = false;
+		}
 	}
 
 	public void AssignNewPlayer(int id, PlayerController controller) {
