@@ -8,10 +8,10 @@ public class KillOnHit : MonoBehaviour {
 	private void OnCollisionEnter2D(Collision2D collision) {
 		if(collision.gameObject.tag == "Player") {
             GameHandler.instance.MuteCurrentPlayerMusic();
+			collision.gameObject.GetComponent<PlayerController>().Kill();
 			if (GetComponent<AudioSource>() == null) {
 				return;
 			}
-			collision.gameObject.GetComponent<PlayerController>().Kill();
             if (deathAudio != null) {
                 GetComponent<AudioSource>().clip = deathAudio;
                 GetComponent<AudioSource>().loop = false;
