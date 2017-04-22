@@ -23,25 +23,30 @@ public class ParticleCollision : MonoBehaviour
         ps = GetComponent<ParticleSystem>();
     }
 
+    public void ActivateParticleSystem() {
+        ps.transform.parent = null;
+        ps.Play();
+        Destroy(gameObject, ps.main.startLifetime.constant);
+    }
+
     private void OnParticleCollision(GameObject other)
     {
         List<ParticleCollisionEvent> tmp = new List<ParticleCollisionEvent>();
-        //Debug.Log(other.name);
         ParticlePhysicsExtensions.GetCollisionEvents(ps, other, tmp);
-        //ParticlePhysicsExtensions.GetCollisionEvents(gameObject, tmp);
         Transform toParent = other.transform;
 
         foreach (var particle in tmp)
         {
-            //particleHolder.Add(new ParticleHolder(particle.intersection, transform));
             var go = (GameObject)Instantiate(splatter, particle.intersection, Quaternion.Euler(0,0,0));
-            //Debug.Log(particle.intersection);
-            go.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-            go.GetComponent<SpriteRenderer>().sortingOrder = toParent.GetComponent<SpriteRenderer>().sortingOrder + 1;
-            go.GetComponent<SpriteRenderer>().sortingLayerName = toParent.GetComponent<SpriteRenderer>().sortingLayerName;
-            //TODO: Possibly do better, have the player character distribute the prefab of splatter, so we dont have to set the material
-            //go.GetComponent<SpriteRenderer>().material = ps.GetComponent<ParticleSystemRenderer>().material;
             go.transform.SetParent(toParent);
+            Debug.Log(Vector3.Distance(toParent.gameObject.GetComponent<SpriteRenderer>().bounds.ClosestPoint(particle.intersection), go.transform.position));//Contains(new Vector3(go.transform.position.x,go.transform.position.y,go.transform.position.z)));
+            if (Vector3.Distance(toParent.gameObject.GetComponent<SpriteRenderer>().bounds.ClosestPoint(particle.intersection), go.transform.position) > 2f) {
+                Destroy(go);
+                continue;
+            }
+            go.GetComponent<SpriteRenderer>().sortingOrder = toParent.GetComponent<SpriteRenderer>().sortingOrder + IncrementerForParticles.GetCurrentAndIncrement();
+            go.GetComponent<SpriteRenderer>().sortingLayerName = toParent.GetComponent<SpriteRenderer>().sortingLayerName;
+            go.layer = go.transform.parent.gameObject.layer;
         }
     }
 
@@ -57,7 +62,6 @@ public class ParticleCollision : MonoBehaviour
 
             particleHolder.RemoveAt(0);
             yield return null;
-            //yield return new WaitForEndOfFrame();
         }
         isRunning = false;
     }

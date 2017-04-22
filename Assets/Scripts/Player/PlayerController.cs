@@ -59,9 +59,7 @@ public sealed class PlayerController : MonoBehaviour
 			LobbySceneBackground.instance.GotKill();
 		}
         
-        var ps = GetComponentInChildren<ParticleSystem>();
-        ps.transform.parent = null;
-        ps.Play();
+        GetComponentInChildren<ParticleCollision>().ActivateParticleSystem();
         Destroy(gameObject);
     }
 
