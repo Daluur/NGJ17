@@ -47,6 +47,7 @@ public class PlayerData {
 	public Color color;
     public PowerUp powerUp;
 	public string name;
+    public AudioSource audioSource;
 
 	public PlayerData(int i, Color col, string n) {
 		ID = i;
