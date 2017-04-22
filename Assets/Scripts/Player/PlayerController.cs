@@ -38,6 +38,9 @@ public sealed class PlayerController : MonoBehaviour
 
 	public void Kill() {
 		GameHandler.instance.PlayerGotKilled();
+        var ps = GetComponentInChildren<ParticleSystem>();
+        ps.transform.parent = null;
+        ps.Play();
 		Destroy(gameObject);
 	}
 }
