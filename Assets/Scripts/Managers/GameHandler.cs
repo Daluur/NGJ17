@@ -75,7 +75,17 @@ public class GameHandler : Singleton<GameHandler> {
 
 	public void GameWon() {
 		gameFinished = true;
-		Debug.LogError("PLAYER " + players[currentPlayer] + " WON!");
+		InputController.instance.gameFinished = true;
+		ui.Won(players[currentPlayer].ID);
+	}
+
+	bool returningToCharSelect = false;
+
+	public void ReturnToCharSelect() {
+		if (returningToCharSelect) {
+			return;
+		}
+		returningToCharSelect = true;
 		SceneManager.LoadScene(0);
 	}
 

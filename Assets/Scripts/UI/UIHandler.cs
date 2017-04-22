@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIHandler : MonoBehaviour {
 
 	public PlayerPanel[] panels;
+	public Text WonText;
 
 	public void Setup(List<PlayerData> activePlayers) {
 		foreach (var i in activePlayers) {
@@ -26,5 +28,10 @@ public class UIHandler : MonoBehaviour {
 				panels[j].SetNotCurrentTurn();
 			}
 		}
+	}
+
+	public void Won(int id) {
+		WonText.text = "PLAYER " + id + " WON!";
+		WonText.gameObject.SetActive(true);
 	}
 }

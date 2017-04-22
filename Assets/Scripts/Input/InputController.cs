@@ -11,6 +11,8 @@ public class InputController : Singleton<InputController> {
 
 	public bool keyboardInput = false;
 	bool startedInGameScene = false;
+	[HideInInspector]
+	public bool gameFinished = false;
 
 	public void Setup(List<int> activeConts, bool startInScene = false) {
 		activeControllers = activeConts;
@@ -27,6 +29,10 @@ public class InputController : Singleton<InputController> {
 	
 	// Update is called once per frame
 	void Update () {
+		if (gameFinished) {
+			ListenForStartButton();
+			return;
+		}
 		if (keyboardInput) {
 			GetKeyboardInput();
 		}
@@ -59,6 +65,17 @@ public class InputController : Singleton<InputController> {
 				if (GameHandler.instance.CanUseFuckYouPower(i)) {
 					currentPlayer.Kill();
 				}
+			}
+		}
+	}
+
+	void ListenForStartButton() {
+		if (Input.GetButtonDown("Start")) {
+			if (keyboardInput) {
+				UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+			}
+			else {
+				GameHandler.instance.ReturnToCharSelect();
 			}
 		}
 	}
