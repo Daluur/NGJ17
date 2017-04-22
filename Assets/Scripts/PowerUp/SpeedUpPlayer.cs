@@ -7,6 +7,17 @@ public class SpeedUpPlayer : PowerUp
     // Update is called once per frame
     float factor = FuckYouConstants.SPEEDUPFACTOR;
     float prevAirSpeed, prevGroundSpeed, prevGroundAcceleration; //prevWallJumpSpeed;
+
+    public SpeedUpPlayer()
+    {
+        displayText = " Sped you up!!!";
+    }
+
+    public SpeedUpPlayer(string displayText)
+    {
+        this.displayText = displayText;
+    }
+
     private bool isRunning;
     public override void UsePowerUp(PlayerController player)
     {

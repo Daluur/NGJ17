@@ -43,9 +43,9 @@ public class CrossSceneData {
 
 public class PlayerData {
 	public int ID;
-	public bool usedFuckYouPower = false;
+	public bool[] usedFuckYouPower = new bool[3];
 	public Color color;
-    public PowerUp powerUp;
+    public PowerUp[] powerUp = new PowerUp[3];
 	public string name;
     public AudioSource audioSource;
 
@@ -53,6 +53,8 @@ public class PlayerData {
 		ID = i;
 		color = col;
 		name = n;
-        powerUp = new IncreaseGravity();
-	}
+        powerUp[0] = new IncreaseGravity();
+        powerUp[1] = new ReverseMovement();
+        powerUp[2] = new HidePaintFromPlayer();
+    }
 }

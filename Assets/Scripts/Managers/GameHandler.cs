@@ -96,17 +96,17 @@ public class GameHandler : Singleton<GameHandler> {
         previousPlayer = players[currentPlayer];
     }
 
-	public void CanUseFuckYouPower(int id, PlayerController currentPlayer) {
+	public void CanUseFuckYouPower(int id, PlayerController currentPlayer, int powerUpID) {
 		foreach (var p in players) {
 			if(p.ID == id) {
-				if (p.usedFuckYouPower) {
+				if (p.usedFuckYouPower[powerUpID]) {
 					return;
 				}
 				else {
-					p.usedFuckYouPower = true;
-					ui.PlayerUsedFuckYou(p.ID, p.name, p.color);
+					p.usedFuckYouPower[powerUpID] = true;
+					ui.PlayerUsedFuckYou(p.ID, p.name, p.color,powerUpID, p);
                     //TODO: Add FUCK YOU power up sound when used
-                    p.powerUp.UsePowerUp(currentPlayer);
+                    p.powerUp[powerUpID].UsePowerUp(currentPlayer);
 					return;
 				}
 			}

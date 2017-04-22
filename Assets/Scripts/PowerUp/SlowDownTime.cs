@@ -6,6 +6,17 @@ public class SlowDownTime : PowerUp {
     // Update is called once per frame
     float factor = FuckYouConstants.SLOWDOWNFACTOR;
     float prevAirSpeed, prevGroundSpeed, prevGroundAcceleration; //prevWallJumpSpeed;
+
+    public SlowDownTime()
+    {
+        displayText = " Slowed you down";
+    }
+
+    public SlowDownTime(string displayText)
+    {
+        this.displayText = displayText;
+    }
+
     private bool isRunning;
     public override void UsePowerUp(PlayerController player)
     {

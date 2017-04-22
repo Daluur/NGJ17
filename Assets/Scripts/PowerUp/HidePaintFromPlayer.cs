@@ -5,6 +5,17 @@ using UnityEngine;
 
 public class HidePaintFromPlayer : PowerUp {
     bool isRunning;
+
+    public HidePaintFromPlayer()
+    {
+        displayText = " Hid the blood?!";
+    }
+
+    public HidePaintFromPlayer(string displayText)
+    {
+        this.displayText = displayText;
+    }
+
     public override void UsePowerUp(PlayerController player)
     {
         if(!isRunning)

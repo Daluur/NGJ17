@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class HideTheAvatar : PowerUp {
     bool isRunning;
+
+    public HideTheAvatar()
+    {
+        displayText = " Hid your PLAYER!";
+    }
+
+    public HideTheAvatar(string displayText)
+    {
+        this.displayText = displayText;
+    }
+
     public override void UsePowerUp(PlayerController player)
     {
         if (!isRunning)
