@@ -44,9 +44,11 @@ public class PlayerData {
 	public int ID;
 	public bool usedFuckYouPower = false;
 	public Color color;
+    public PowerUp powerUp;
 
 	public PlayerData(int i, Color col) {
 		ID = i;
 		color = col;
+        powerUp = new IncreaseGravity();
 	}
 }
