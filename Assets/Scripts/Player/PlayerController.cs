@@ -173,10 +173,9 @@ public sealed class PlayerController : MonoBehaviour
         body2D.velocity = Rotate(directedVelocity, -normalAngle);
 
         if (Mathf.Abs(directedMoveX) > 0.6f)
+        {
             RunningSound();
-
-        body2D.velocity = new Vector2(move, body2D.velocity.y);
-        
+        }
     }
 
     private void RunningSound()
