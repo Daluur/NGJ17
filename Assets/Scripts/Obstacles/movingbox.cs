@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class movingbox : MonoBehaviour {
 
+	public int length;
+	public int speed;
 	float initialX;
 
 	// Use this for initialization
@@ -14,6 +16,6 @@ public class movingbox : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		transform.position = new Vector3 (initialX + Mathf.PingPong (2*Time.time, 5), transform.position.y, transform.position.z);
+		transform.position = new Vector3 (initialX + Mathf.PingPong (speed*Time.time, length), transform.position.y, transform.position.z);
 	}
 }
