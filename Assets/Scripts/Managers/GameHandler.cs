@@ -26,6 +26,9 @@ public class GameHandler : Singleton<GameHandler> {
 	List<int> playerReachedCheckpoint = new List<int>();
 
 	public GameObject UIObjectprefab;
+
+	public GameObject spawnParticleSystem;
+
 	UIHandler ui;
 
 	bool gameFinished = false;
@@ -57,6 +60,7 @@ public class GameHandler : Singleton<GameHandler> {
     void InitAudio() {
         if (simultaneous || FFA)
         {
+			otherModeAudioSourceBG = GetComponent<AudioSource>();
             otherModeAudioSourceBG.clip = ffaBG;
             otherModeAudioSourceBG.Play();
             otherModeAudioSourceBG.volume = standardBGVolume;
@@ -122,7 +126,7 @@ public class GameHandler : Singleton<GameHandler> {
 			currentPlayer = 0;
 		}
 		if (!simultaneous && !FFA) {
-			SpawnPlayer();
+			SpawnPlayer(1.5f);
 		}
 		else if (simultaneous && alivePlayers == 0) {
 			SimultaneousSpawn();
@@ -135,12 +139,9 @@ public class GameHandler : Singleton<GameHandler> {
 		}
 	}
 
-	void SpawnPlayer() {
-		GameObject temp = Instantiate(avatars[players[currentPlayer].ID-1], playerReachedCheckpoint.Contains(players[currentPlayer].ID) ? checkpoint.position : spawnPoint.position, Quaternion.identity) as GameObject;
-		if (simultaneous || FFA) {
-			Destroy(temp.GetComponent<AudioListener>());
-		}
-		InputController.instance.AssignNewPlayer(players[currentPlayer].ID, temp.GetComponent<PlayerController>());
+	void SpawnPlayer(float extraDelay = 0) {
+		StartCoroutine(DelayedPlayerSpawning(players[currentPlayer].ID, extraDelay));
+
         if(!simultaneous && !FFA) { 
             if (previousPlayer != null)
                 previousPlayer.audioSource.volume = 0;
@@ -152,10 +153,10 @@ public class GameHandler : Singleton<GameHandler> {
 
 	IEnumerator SpawnPlayerByID(int id) {
 		yield return new WaitForSeconds(values.respawnTimerFFAMode);
-		GameObject temp = Instantiate(avatars[id - 1], playerReachedCheckpoint.Contains(players[currentPlayer].ID) ? checkpoint.position : spawnPoint.position, Quaternion.identity) as GameObject;
+		StartCoroutine(DelayedPlayerSpawning(id));
+
         if (!simultaneous && !FFA)
         {
-            InputController.instance.AssignNewPlayer(id, temp.GetComponent<PlayerController>());
             if (previousPlayer != null)
                 previousPlayer.audioSource.volume = 0;
             players[currentPlayer].audioSource.volume = standardBGVolume;
@@ -164,10 +165,29 @@ public class GameHandler : Singleton<GameHandler> {
 		alivePlayers++;
 	}
 
+	IEnumerator DelayedPlayerSpawning(int id, float extraDelay = 0) {
+		yield return new WaitForSeconds(extraDelay);
+		Color col = Color.white;
+		foreach (PlayerData data in players) {
+			if(data.ID == id) {
+				col = data.color;
+				break;
+			}
+		}
+		Instantiate(spawnParticleSystem, playerReachedCheckpoint.Contains(id) ? checkpoint.position : spawnPoint.position, Quaternion.identity).GetComponent<ParticleSystem>().startColor = col;
+		yield return new WaitForSeconds(1.25f);
+		GameObject temp = Instantiate(avatars[id - 1], playerReachedCheckpoint.Contains(id) ? checkpoint.position : spawnPoint.position, Quaternion.identity) as GameObject;
+		AudioListeneerFollow.instance.SetPlayerToFollow(temp);
+		if (simultaneous || FFA) {
+			Destroy(temp.GetComponent<AudioListener>());
+		}
+		InputController.instance.AssignNewPlayer(id, temp.GetComponent<PlayerController>());
+	}
+
 	void SimultaneousSpawn() {
 		currentPlayer = 0;
 		foreach (PlayerData i in players) {
-			SpawnPlayer();
+			SpawnPlayer(1.5f);
 			currentPlayer++;
 		}
 	}
@@ -207,7 +227,7 @@ public class GameHandler : Singleton<GameHandler> {
 		InputController.instance.gameFinished = true;
 		foreach (PlayerData data in players) {
 			if(data.ID == id) {
-				ui.Won(data.name);
+				ui.Won(data.name, data.color);
 				return;
 			}
 		}

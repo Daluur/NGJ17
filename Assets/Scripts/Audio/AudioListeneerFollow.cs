@@ -8,6 +8,9 @@ public class AudioListeneerFollow : Singleton<AudioListeneerFollow> {
 
 	// Update is called once per frame
 	void Update () {
+		if(playerToFollow == null) {
+			return;
+		}
         transform.position = playerToFollow.transform.position;
 	}
 
