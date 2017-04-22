@@ -114,12 +114,16 @@ public class InputController : Singleton<InputController> {
 		if (Input.GetKey(KeyCode.D)) {
 			direction += 1f;
 		}
+        if (Input.GetKeyDown(KeyCode.U)) {
+            PowerUp pu = new HidePaintFromPlayer();
+            pu.UsePowerUp(currentPlayer);
+        }
 		currentPlayer.MoveDirection = direction;
         currentPlayer.Jumping = Input.GetKey(KeyCode.W);
 	}
 
 	/*foreach (int i in activeControllers) {
-		if(currentPlayerID != i) {
+		if(currentPlayerID !=   i) {
 			if (!startedInGameScene) {
 				continue;
 			}

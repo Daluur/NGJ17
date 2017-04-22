@@ -39,7 +39,6 @@ public class ParticleCollision : MonoBehaviour
         {
             var go = (GameObject)Instantiate(splatter, particle.intersection, Quaternion.Euler(0,0,0));
             go.transform.SetParent(toParent);
-            Debug.Log(Vector3.Distance(toParent.gameObject.GetComponent<SpriteRenderer>().bounds.ClosestPoint(particle.intersection), go.transform.position));//Contains(new Vector3(go.transform.position.x,go.transform.position.y,go.transform.position.z)));
             if (Vector3.Distance(toParent.gameObject.GetComponent<SpriteRenderer>().bounds.ClosestPoint(particle.intersection), go.transform.position) > 2f) {
                 Destroy(go);
                 continue;
@@ -50,11 +49,11 @@ public class ParticleCollision : MonoBehaviour
         }
     }
 
-    private bool isRunning;
+    //private bool isRunning;
 
     IEnumerator ShowThem()
     {
-        isRunning = true;
+       // isRunning = true;
         while (particleHolder.Count > 0)
         {
             var go = (GameObject)Instantiate(splatter, particleHolder[0].intersectionPoint, Quaternion.identity);
@@ -63,6 +62,6 @@ public class ParticleCollision : MonoBehaviour
             particleHolder.RemoveAt(0);
             yield return null;
         }
-        isRunning = false;
+      //  isRunning = false;
     }
 }
