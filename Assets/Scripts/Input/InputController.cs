@@ -115,6 +115,7 @@ public class InputController : Singleton<InputController> {
 			direction += 1f;
 		}
 		currentPlayer.MoveDirection = direction;
+        currentPlayer.Jumping = Input.GetKey(KeyCode.W);
 	}
 
 	/*foreach (int i in activeControllers) {
