@@ -15,24 +15,34 @@ public class ParticleHolder
 
 public class ParticleCollision : MonoBehaviour
 {
-    public ParticleSystem ps;
+    private ParticleSystem ps;
     public GameObject splatter;
     private List<ParticleHolder> particleHolder = new List<ParticleHolder>();
+
+    void Start() {
+        ps = GetComponent<ParticleSystem>();
+    }
 
     private void OnParticleCollision(GameObject other)
     {
         List<ParticleCollisionEvent> tmp = new List<ParticleCollisionEvent>();
-        ParticlePhysicsExtensions.GetCollisionEvents(ps, gameObject, tmp);
+        Debug.Log(other.name);
+        ParticlePhysicsExtensions.GetCollisionEvents(ps, other, tmp);
+        //ParticlePhysicsExtensions.GetCollisionEvents(gameObject, tmp);
+        Transform toParent = other.transform;
+
         foreach (var particle in tmp)
         {
-            particleHolder.Add(new ParticleHolder(particle.intersection, transform));
-            var go = (GameObject)Instantiate(splatter, particle.intersection, Quaternion.identity);
+            //particleHolder.Add(new ParticleHolder(particle.intersection, transform));
+            var go = (GameObject)Instantiate(splatter, particle.intersection, Quaternion.Euler(0,0,0));
+            Debug.Log(particle.intersection);
+            go.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            go.GetComponent<SpriteRenderer>().sortingOrder = toParent.GetComponent<SpriteRenderer>().sortingOrder + 1;
+            go.GetComponent<SpriteRenderer>().sortingLayerName = toParent.GetComponent<SpriteRenderer>().sortingLayerName;
             //TODO: Possibly do better, have the player character distribute the prefab of splatter, so we dont have to set the material
             //go.GetComponent<SpriteRenderer>().material = ps.GetComponent<ParticleSystemRenderer>().material;
-            go.transform.parent = transform;
+            go.transform.SetParent(toParent);
         }
-        // if (!isRunning)
-        //    StartCoroutine(ShowThem());
     }
 
     private bool isRunning;

@@ -17,6 +17,6 @@ public class Splatter : MonoBehaviour
     {
         spriteRenderer.sprite = sprites[Random.Range(0, sprites.Count)];
         spriteRenderer.color = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
-        transform.rotation = Quaternion.Euler(0, 0, Random.Range(0, 360));
+        //transform.rotation = Quaternion.Euler(0, 0, Random.Range(0, 360));
     }
 }
