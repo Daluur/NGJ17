@@ -19,6 +19,9 @@ public class CrossSceneData {
 
 	List<PlayerData> playerInfo = new List<PlayerData>();
 
+	public bool simultaneous = false;
+	public bool FFA = false;
+
 	List<int> activeControllers;
 
 	public List<int> GetActiveControllers() {

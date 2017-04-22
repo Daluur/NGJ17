@@ -8,6 +8,10 @@ public static class FuckYouConstants {
     public const float SLOWDOWNFACTOR = 0.5f;
 }
 
+public static class values {
+	public const float respawnTimerFFAMode = 5;
+}
+
 public static class ParticleSystemConstants
 {
     public const float TIMEBEFOREDESTRUCTION = 3f;

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public sealed class PlayerController : MonoBehaviour
 {
@@ -28,6 +29,7 @@ public sealed class PlayerController : MonoBehaviour
     private bool _grounded;
     private float _moveDirection;
     private float _jumpInputTime = float.NegativeInfinity;
+    private float _jumpOvertimeTime = float.NegativeInfinity;
     private float _lastGroundedTime = float.NegativeInfinity;
     private float _lastClimbingTime = float.NegativeInfinity;
     private Vector2 _contactNormal;
@@ -47,6 +49,10 @@ public sealed class PlayerController : MonoBehaviour
             {
                 _jumpInputTime = Time.timeSinceLevelLoad;
             }
+            else if (!value)
+            {
+                _jumpOvertimeTime = float.NegativeInfinity;
+            }
             _jumping = value;
         }
     }
@@ -59,7 +65,7 @@ public sealed class PlayerController : MonoBehaviour
         }
         _dead = true;
 		if(GameHandler.instance != null) {
-			GameHandler.instance.PlayerGotKilled();
+			GameHandler.instance.PlayerGotKilled(this);
 		}
 		else {
 			LobbySceneBackground.instance.GotKill();
@@ -106,6 +112,8 @@ public sealed class PlayerController : MonoBehaviour
         var collider = GetComponent<Collider2D>();
         var contacts = new ContactPoint2D[MAX_CONTACTS];
         var contactAmount = collider.GetContacts(contacts);
+        var groundNormals = new List<Vector2>();
+        var wallNormals = new List<Vector2>();
         if (contactAmount == 0)
         {
             return;
@@ -114,16 +122,29 @@ public sealed class PlayerController : MonoBehaviour
         {
             var contactPoint = contacts[i];
             var angle = Vector2.Angle(Vector2.up, contactPoint.normal);
-            if (angle < wallAngle)
+            if (angle < groundAngle)
             {
-                _contactNormal = contactPoint.normal;
-                _lastClimbingTime = time;
-                if (angle < groundAngle)
-                {
-                    _grounded = true;
-                    _lastGroundedTime = time;
-                }
+                groundNormals.Add(contactPoint.normal);
+                _grounded = true;
+                _lastGroundedTime = time;
             }
+            else if (angle < wallAngle)
+            {
+                wallNormals.Add(contactPoint.normal);
+                _lastClimbingTime = time;
+            }
+            else
+            {
+                _jumpOvertimeTime = float.NegativeInfinity;
+            }
+        }
+        if (groundNormals.Count > 0)
+        {
+            _contactNormal = AverageNormal(groundNormals.ToArray());
+        }
+        else if (wallNormals.Count > 0)
+        {
+            _contactNormal = AverageNormal(wallNormals.ToArray());
         }
     }
 
@@ -137,12 +158,14 @@ public sealed class PlayerController : MonoBehaviour
         float acceleration;
         if (_grounded || transform.parent != null)
         {
+            body2D.gravityScale = 0;
             normalAngle = Vector2.Angle(Vector2.up, _contactNormal);
             move = MoveDirection * groundSpeed;
             acceleration = groundAcceleration;
         }
         else
         {
+            body2D.gravityScale = 2.5f;
             acceleration = airAcceleration;
             normalAngle = 0f;
             if (MoveDirection == 0)
@@ -160,7 +183,6 @@ public sealed class PlayerController : MonoBehaviour
         }
 
         var directedMomentum = Rotate(momentum, normalAngle);
-
         
         var directedMoveX = Mathf.MoveTowards(momentum.x, move, acceleration * Time.fixedDeltaTime);
 
@@ -168,68 +190,59 @@ public sealed class PlayerController : MonoBehaviour
         body2D.velocity = Rotate(directedVelocity, -normalAngle);
 
         if (Mathf.Abs(directedMoveX) > 0.6f)
+        {
             RunningSound();
-
-        body2D.velocity = new Vector2(move, body2D.velocity.y);
-        
+        }
     }
 
-    private void RunningSound() {
-        if (!myAudioSource.isPlaying) { 
+    private void RunningSound()
+    {
+        if (!myAudioSource.isPlaying)
+        { 
         myAudioSource.clip = soundHolder.running;
         myAudioSource.Play();
         myAudioSource.volume = 1;
         }
-
     }
+
     private void JumpingSound()
     {
 
     }
 
-  /*  public void Kill() {
-		if (dead) {
-			return;
-		}
-
-        if (deathClip == null) {
-            deathClip = soundHolder.death;
-        }
-
-        GameHandler.instance.MuteCurrentPlayerMusic();
-        myAudioSource.clip = deathClip;
-        myAudioSource.Play();
-        
-        dead = true;
-		GameHandler.instance.PlayerGotKilled();
-        var ps = GetComponentInChildren<ParticleSystem>();
-        ps.transform.parent = null;
-        ps.Play();
-		Destroy(gameObject);
-	}*/
-
     private void UpdateJump()
     {
         var time = Time.timeSinceLevelLoad;
-        if (_jumpInputTime + inputJumpEarlyBias < time)
+        var isJumpFlag = _jumpInputTime + inputJumpEarlyBias > time;
+        var isOvertimeFlag = _jumpOvertimeTime + jumpMaxOvertime > time;
+        if (!isJumpFlag && !isOvertimeFlag)
         {
             return;
         }
 
         var body2D = GetComponent<Rigidbody2D>();
         var momentum = body2D.velocity;
-        var jump = Vector2.zero;
-        if (_lastGroundedTime + inputJumpLateBias > Time.timeSinceLevelLoad || transform.parent != null)
+        var jump = momentum;
+        if (((_lastGroundedTime + inputJumpLateBias > Time.timeSinceLevelLoad || transform.parent != null) && isJumpFlag) ||
+            isOvertimeFlag)
         {
-            jump = Vector2.up * groundJumpSpeed;
+            jump = new Vector2(momentum.x, groundJumpSpeed);
             ResetJump();
+            if (isJumpFlag)
+            {
+                _jumpOvertimeTime = time;
+            }
         }
-        else if (_lastClimbingTime + inputJumpLateBias > Time.timeSinceLevelLoad)
+        else if (_lastClimbingTime + inputJumpLateBias > Time.timeSinceLevelLoad && isJumpFlag)
         {
             jump = new Vector2(Mathf.Sign(_contactNormal.x), 1).normalized * wallJumpSpeed;
             ResetJump();
+            if (isJumpFlag)
+            {
+                _jumpOvertimeTime = time;
+            }
         }
-        body2D.velocity += jump;
+        body2D.velocity = jump;
     }
 
     private void ResetJump()
@@ -238,6 +251,18 @@ public sealed class PlayerController : MonoBehaviour
         _lastGroundedTime = float.NegativeInfinity;
         _lastClimbingTime = float.NegativeInfinity;
         _grounded = false;
+    }
+
+    private static Vector2 AverageNormal(Vector2[] vectors)
+    {
+        var x = 0f;
+        var y = 0f;
+        foreach (var vector in vectors)
+        {
+            x += vector.x;
+            y += vector.y;
+        }
+        return new Vector2(x / vectors.Length, y / vectors.Length).normalized;
     }
 
     private static Vector2 Rotate(Vector2 v, float degrees)

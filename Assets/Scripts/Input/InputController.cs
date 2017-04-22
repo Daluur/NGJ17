@@ -6,8 +6,10 @@ public class InputController : Singleton<InputController> {
 
 	List<int> activeControllers = new List<int>();
 
+	bool simultaneous;
+
 	int currentPlayerID;
-	PlayerController currentPlayer;
+	Dictionary<int, PlayerController> currentPlayer = new Dictionary<int, PlayerController>();
 
     public float reversePowerUpVar = 1f;
 
@@ -16,21 +18,29 @@ public class InputController : Singleton<InputController> {
 	[HideInInspector]
 	public bool gameFinished = false;
 
-	public void Setup(List<int> activeConts, bool startInScene = false) {
+	public void Setup(List<int> activeConts, bool startInScene = false, bool sim = false) {
+		simultaneous = sim;
 		activeControllers = activeConts;
 		if (startInScene) {
 			startedInGameScene = true;
 			activeControllers = new List<int>() { 1, 2, 3, 4 };
 		}
+		else {
+			startedInGameScene = false;
+			keyboardInput = false;
+		}
 	}
 
 	public void AssignNewPlayer(int id, PlayerController controller) {
 		currentPlayerID = id;
-		currentPlayer = controller;
+		currentPlayer[id] = controller;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if(currentPlayer.Count == 0) {
+			return;
+		}
 		if (gameFinished) {
 			ListenForStartButton();
 			return;
@@ -38,8 +48,11 @@ public class InputController : Singleton<InputController> {
 		if (keyboardInput) {
 			GetKeyboardInput();
 		}
-		else if(startedInGameScene){
+		else if (startedInGameScene) {
 			GetALLJoystickInput();
+		}
+		else if (simultaneous) {
+			GetMultipleJoystickInput();
 		}
 		else {
 			GetJoystickInput();
@@ -49,12 +62,12 @@ public class InputController : Singleton<InputController> {
 
 	void GetJoystickInput() {
 		if (Input.GetButtonDown("Joy" + currentPlayerID + "Jump")) {
-			currentPlayer.Jumping = true;
+			currentPlayer[currentPlayerID].Jumping = true;
 		}
 		if (Input.GetButtonUp("Joy" + currentPlayerID + "Jump")) {
-			currentPlayer.Jumping = false;
+			currentPlayer[currentPlayerID].Jumping = false;
 		}
-        currentPlayer.MoveDirection = Input.GetAxis("Joy" + currentPlayerID + "X") * reversePowerUpVar;
+		currentPlayer[currentPlayerID].MoveDirection = Input.GetAxis("Joy" + currentPlayerID + "X") * reversePowerUpVar;
 	}
 
 	void GetNonActivePlayerInput() {
@@ -62,20 +75,16 @@ public class InputController : Singleton<InputController> {
 			if (currentPlayerID == i) {
 				continue;
 			}
-			if (Input.GetButtonDown("Joy" + i + "Jump")) {
-				Debug.Log("Not active player: "+i+" Pressed fuck you button");
-                //GameHandler.instance.CanUseFuckYouPower(i, currentPlayer);
-			}
             if (Input.GetButtonDown("Joy" + i + "LeftButton")) {
-                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer, 0);
+                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer[currentPlayerID], 0);
             }
             if (Input.GetButtonDown("Joy" + i + "UpperButton"))
             {
-                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer, 1);
+                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer[currentPlayerID], 1);
             }
             if (Input.GetButtonDown("Joy" + i + "RightButton"))
             {
-                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer, 2);
+                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer[currentPlayerID], 2);
             }
         }
 	}
@@ -103,10 +112,10 @@ public class InputController : Singleton<InputController> {
 				}
 			}
 			if (Input.GetButtonDown("Joy" + i + "Jump")) {
-				currentPlayer.Jumping = true;
+				currentPlayer[currentPlayerID].Jumping = true;
 			}
 			if (Input.GetButtonUp("Joy" + i + "Jump")) {
-				currentPlayer.Jumping = false;
+				currentPlayer[currentPlayerID].Jumping = false;
 			}
             if (Input.GetButtonDown("Joy" + i + "RightButton"))
             {
@@ -122,7 +131,22 @@ public class InputController : Singleton<InputController> {
             }
             moveDir += Input.GetAxis("Joy" + i + "X");
 		}
-		currentPlayer.MoveDirection = moveDir;
+		currentPlayer[currentPlayerID].MoveDirection = moveDir;
+	}
+
+	void GetMultipleJoystickInput() {
+		foreach (int i in activeControllers) {
+			if (!currentPlayer.ContainsKey(i)) {
+				continue;
+			}
+			if (Input.GetButtonDown("Joy" + i + "Jump")) {
+				currentPlayer[i].Jumping = true;
+			}
+			if (Input.GetButtonUp("Joy" + i + "Jump")) {
+				currentPlayer[i].Jumping = false;
+			}
+			currentPlayer[i].MoveDirection = Input.GetAxis("Joy" + i + "X");
+		}
 	}
 
 	/// <summary>
@@ -139,12 +163,21 @@ public class InputController : Singleton<InputController> {
 		if (Input.GetKey(KeyCode.D)) {
 			direction += 1f;
 		}
-        if (Input.GetKeyDown(KeyCode.U)) {
+       /*if (Input.GetKeyDown(KeyCode.U)) {
             PowerUp pu = new ReverseMovement();
             pu.UsePowerUp(currentPlayer);
-        }
-		currentPlayer.MoveDirection = direction * reversePowerUpVar;
-        currentPlayer.Jumping = Input.GetKey(KeyCode.W);
+        }*/
+		currentPlayer[currentPlayerID].MoveDirection = direction * reversePowerUpVar;
+        currentPlayer[currentPlayerID].Jumping = Input.GetKey(KeyCode.W);
+	}
+
+	public int GetIDFromController(PlayerController cont) {
+		foreach (KeyValuePair<int,PlayerController> item in currentPlayer) {
+			if(item.Value == cont) {
+				return item.Key;
+			}
+		}
+		return 1;
 	}
 
 	/*foreach (int i in activeControllers) {
