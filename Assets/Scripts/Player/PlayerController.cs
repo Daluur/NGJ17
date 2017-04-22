@@ -18,8 +18,8 @@ public sealed class PlayerController : MonoBehaviour
         moveSpeed = Mathf.Max(0, moveSpeed);
     }
 
-    // Update is called once per frame
-    private void FixedUpdate()
+	// Update is called once per frame
+	private void FixedUpdate()
     {
         var body2D = GetComponent<Rigidbody2D>();
 
@@ -35,4 +35,9 @@ public sealed class PlayerController : MonoBehaviour
 
         body2D.velocity = new Vector2(move, body2D.velocity.y);
     }
+
+	public void Kill() {
+		GameHandler.instance.PlayerGotKilled();
+		Destroy(gameObject);
+	}
 }
