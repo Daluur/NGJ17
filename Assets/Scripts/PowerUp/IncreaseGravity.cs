@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class IncreaseGravity : PowerUp {
     public float gravityModifier = FuckYouConstants.GRAVITYMODIFIER;
+
+    public IncreaseGravity()
+    {
+        displayText = " Altered gravity!";
+    }
+
+    public IncreaseGravity(string displayText)
+    {
+        this.displayText = displayText;
+    }
+
     public override void UsePowerUp(PlayerController player)
     {
 		SetCurrentPlayer(player);

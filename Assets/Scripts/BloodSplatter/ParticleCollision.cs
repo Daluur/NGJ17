@@ -49,11 +49,11 @@ public class ParticleCollision : MonoBehaviour
         }
     }
 
-    private bool isRunning;
+    //private bool isRunning;
 
     IEnumerator ShowThem()
     {
-        isRunning = true;
+       // isRunning = true;
         while (particleHolder.Count > 0)
         {
             var go = (GameObject)Instantiate(splatter, particleHolder[0].intersectionPoint, Quaternion.identity);
@@ -62,6 +62,6 @@ public class ParticleCollision : MonoBehaviour
             particleHolder.RemoveAt(0);
             yield return null;
         }
-        isRunning = false;
+      //  isRunning = false;
     }
 }

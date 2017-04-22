@@ -16,11 +16,11 @@ public class UIHandler : MonoBehaviour {
 		}
 	}
 
-	public void PlayerUsedFuckYou(int i, string name, Color col) {
-		powerUpText.gameObject.SetActive(true);
-		powerUpText.text = name + " Altered gravity!";
+	public void PlayerUsedFuckYou(int i, string name, Color col, int powerUpID, PlayerData player) {
+        powerUpText.gameObject.SetActive(true);
+		powerUpText.text = name + player.powerUp[powerUpID].displayText;
 		StartCoroutine(Fade(powerUpText, 2, col));
-		panels[i - 1].UsedFuckYou();
+		panels[i - 1].UsedFuckYou(powerUpID);
 	}
 
 	public void NewPlayersTurn(int i) {

@@ -153,19 +153,17 @@ public sealed class PlayerController : MonoBehaviour
         var body2D = GetComponent<Rigidbody2D>();
 
         var momentum = body2D.velocity;
+        float acceleration;
         float normalAngle;
         float move;
-        float acceleration;
         if (_grounded || transform.parent != null)
         {
-            body2D.gravityScale = 0;
+            acceleration = groundAcceleration;
             normalAngle = Vector2.Angle(Vector2.up, _contactNormal);
             move = MoveDirection * groundSpeed;
-            acceleration = groundAcceleration;
         }
         else
         {
-            body2D.gravityScale = 2.5f;
             acceleration = airAcceleration;
             normalAngle = 0f;
             if (MoveDirection == 0)
@@ -183,8 +181,8 @@ public sealed class PlayerController : MonoBehaviour
         }
 
         var directedMomentum = Rotate(momentum, normalAngle);
-        
-        var directedMoveX = Mathf.MoveTowards(momentum.x, move, acceleration * Time.fixedDeltaTime);
+
+        var directedMoveX = Mathf.MoveTowards(directedMomentum.x, move, acceleration * Time.fixedDeltaTime);
 
         var directedVelocity = new Vector2(directedMoveX, directedMomentum.y);
         body2D.velocity = Rotate(directedVelocity, -normalAngle);
