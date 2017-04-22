@@ -129,6 +129,10 @@ public sealed class PlayerController : MonoBehaviour
                     _lastGroundedTime = time;
                 }
             }
+            else
+            {
+                _jumpOvertimeTime = float.NegativeInfinity;
+            }
         }
     }
 
