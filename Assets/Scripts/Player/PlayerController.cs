@@ -5,11 +5,11 @@ public sealed class PlayerController : MonoBehaviour
     private const int MAX_CONTACTS = 4;
 
     public float groundSpeed = 5f;
-    public float airSpeed = 3f;
+    public float airSpeed = 5f;
     public float groundJumpSpeed = 10f;
-    public float wallJumpSpeed = 6f;
-    public float groundAcceleration = 5f;
-    public float airAcceleration = 1f;
+    public float wallJumpSpeed = 10f;
+    public float groundAcceleration = 50f;
+    public float airAcceleration = 30f;
     public float inputJumpEarlyBias = 0.1f;
     public float inputJumpLateBias = 0.1f;
     public float jumpMaxOvertime = 1f;
