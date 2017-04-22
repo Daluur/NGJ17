@@ -8,6 +8,11 @@ public class ControllerAssigning : MonoBehaviour {
 	List<int> activeControllers = new List<int>();
 	public LobbyPlayer[] avatars;
 	public GameObject readyToStart;
+	int map = 1;
+
+	private void Start() {
+		ModeToggle(0);
+	}
 
 	// Update is called once per frame
 	void Update () {
@@ -37,7 +42,7 @@ public class ControllerAssigning : MonoBehaviour {
 			Debug.Log("Started game!");
 			activeControllers.Sort();
 			CrossSceneData.Instance.SetActiveControllers(activeControllers);
-			SceneManager.LoadScene(1);
+			SceneManager.LoadScene(map);
 		}
 	}
 
@@ -53,5 +58,24 @@ public class ControllerAssigning : MonoBehaviour {
 		if (activeControllers.Count == 0) {
 			readyToStart.SetActive(false);
 		}
+	}
+
+	public void ModeToggle(int i) {
+		if (i == 0) {
+			CrossSceneData.Instance.simultaneous = false;
+			CrossSceneData.Instance.FFA = false;
+		}
+		else if(i == 1) {
+			CrossSceneData.Instance.simultaneous = true;
+			CrossSceneData.Instance.FFA = false;
+		}
+		else if (i == 2) {
+			CrossSceneData.Instance.simultaneous = false;
+			CrossSceneData.Instance.FFA = true;
+		}
+	}
+
+	public void MapToggle(int i) {
+		map = i+1;
 	}
 }

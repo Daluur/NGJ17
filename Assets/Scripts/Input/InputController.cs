@@ -6,32 +6,39 @@ public class InputController : Singleton<InputController> {
 
 	List<int> activeControllers = new List<int>();
 
+	bool simultaneous;
+
 	int currentPlayerID;
-	PlayerController currentPlayer;
+	Dictionary<int, PlayerController> currentPlayer = new Dictionary<int, PlayerController>();
 
 	public bool keyboardInput = false;
 	bool startedInGameScene = false;
 	[HideInInspector]
 	public bool gameFinished = false;
 
-	public void Setup(List<int> activeConts, bool startInScene = false) {
+	public void Setup(List<int> activeConts, bool startInScene = false, bool sim = false) {
+		simultaneous = sim;
 		activeControllers = activeConts;
 		if (startInScene) {
 			startedInGameScene = true;
 			activeControllers = new List<int>() { 1, 2, 3, 4 };
 		}
 		else {
+			startedInGameScene = false;
 			keyboardInput = false;
 		}
 	}
 
 	public void AssignNewPlayer(int id, PlayerController controller) {
 		currentPlayerID = id;
-		currentPlayer = controller;
+		currentPlayer[id] = controller;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if(currentPlayer.Count == 0) {
+			return;
+		}
 		if (gameFinished) {
 			ListenForStartButton();
 			return;
@@ -39,8 +46,11 @@ public class InputController : Singleton<InputController> {
 		if (keyboardInput) {
 			GetKeyboardInput();
 		}
-		else if(startedInGameScene){
+		else if (startedInGameScene) {
 			GetALLJoystickInput();
+		}
+		else if (simultaneous) {
+			GetMultipleJoystickInput();
 		}
 		else {
 			GetJoystickInput();
@@ -50,12 +60,12 @@ public class InputController : Singleton<InputController> {
 
 	void GetJoystickInput() {
 		if (Input.GetButtonDown("Joy" + currentPlayerID + "Jump")) {
-			currentPlayer.Jumping = true;
+			currentPlayer[currentPlayerID].Jumping = true;
 		}
 		if (Input.GetButtonUp("Joy" + currentPlayerID + "Jump")) {
-			currentPlayer.Jumping = false;
+			currentPlayer[currentPlayerID].Jumping = false;
 		}
-		currentPlayer.MoveDirection = Input.GetAxis("Joy" + currentPlayerID + "X");
+		currentPlayer[currentPlayerID].MoveDirection = Input.GetAxis("Joy" + currentPlayerID + "X");
 	}
 
 	void GetNonActivePlayerInput() {
@@ -65,7 +75,7 @@ public class InputController : Singleton<InputController> {
 			}
 			if (Input.GetButtonDown("Joy" + i + "Jump")) {
 				Debug.Log("Not active player: "+i+" Pressed fuck you button");
-                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer);
+                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer[currentPlayerID]);
 			}
 		}
 	}
@@ -93,14 +103,29 @@ public class InputController : Singleton<InputController> {
 				}
 			}
 			if (Input.GetButtonDown("Joy" + i + "Jump")) {
-				currentPlayer.Jumping = true;
+				currentPlayer[currentPlayerID].Jumping = true;
 			}
 			if (Input.GetButtonUp("Joy" + i + "Jump")) {
-				currentPlayer.Jumping = false;
+				currentPlayer[currentPlayerID].Jumping = false;
 			}
 			moveDir += Input.GetAxis("Joy" + i + "X");
 		}
-		currentPlayer.MoveDirection = moveDir;
+		currentPlayer[currentPlayerID].MoveDirection = moveDir;
+	}
+
+	void GetMultipleJoystickInput() {
+		foreach (int i in activeControllers) {
+			if (!currentPlayer.ContainsKey(i)) {
+				continue;
+			}
+			if (Input.GetButtonDown("Joy" + i + "Jump")) {
+				currentPlayer[i].Jumping = true;
+			}
+			if (Input.GetButtonUp("Joy" + i + "Jump")) {
+				currentPlayer[i].Jumping = false;
+			}
+			currentPlayer[i].MoveDirection = Input.GetAxis("Joy" + i + "X");
+		}
 	}
 
 	/// <summary>
@@ -117,8 +142,17 @@ public class InputController : Singleton<InputController> {
 		if (Input.GetKey(KeyCode.D)) {
 			direction += 1f;
 		}
-		currentPlayer.MoveDirection = direction;
-        currentPlayer.Jumping = Input.GetKey(KeyCode.W);
+		currentPlayer[currentPlayerID].MoveDirection = direction;
+        currentPlayer[currentPlayerID].Jumping = Input.GetKey(KeyCode.W);
+	}
+
+	public int GetIDFromController(PlayerController cont) {
+		foreach (KeyValuePair<int,PlayerController> item in currentPlayer) {
+			if(item.Value == cont) {
+				return item.Key;
+			}
+		}
+		return 1;
 	}
 
 	/*foreach (int i in activeControllers) {
