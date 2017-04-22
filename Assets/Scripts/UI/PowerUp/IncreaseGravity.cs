@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class IncreaseGravity : PowerUp {
-    public float gravityModifier = 5f;
+    public float gravityModifier = FuckYouConstants.GRAVITYMODIFIER;
     public override void UsePowerUp()
     {
         GameHandler.instance.StartCoroutine(GravityModifier());

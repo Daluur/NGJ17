@@ -5,7 +5,7 @@ using UnityEngine;
 public abstract class PowerUp {
 
     public GameObject currentPlayer;
-    public float powerUpDuration = 5f;
+    public float powerUpDuration = FuckYouConstants.DURATIONINSECONDS;
 
     public void SetCurrentPlayer(GameObject currPlayer) {
         currentPlayer = currPlayer;
