@@ -4,6 +4,7 @@ using UnityEngine;
 
 public abstract class PowerUp {
 
+    public string displayText = "No Display text defined?!";
     public PlayerController currentPlayer;
     public float powerUpDuration = FuckYouConstants.DURATIONINSECONDS;
 
