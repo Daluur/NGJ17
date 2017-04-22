@@ -9,11 +9,16 @@ public class GameHandler : Singleton<GameHandler> {
 	List<PlayerData> players;
 
 	public GameObject[] avatars;
+    public GameObject audioFollowListener;
 
-    public float standardBGVolume = 0.5f;
+    public float standardBGVolume = 0.3f;
 
     private PlayerData previousPlayer;
     private AudioSource[] audioSources;
+
+    private AudioSource otherModeAudioSourceBG;
+    public AudioClip ffaBG;
+    public AudioClip powerUpClip;
 
 	public Transform spawnPoint;
 	public Transform checkpoint;
@@ -29,8 +34,14 @@ public class GameHandler : Singleton<GameHandler> {
 
 	int alivePlayers = 0;
 
-	void Start() {
-		if(CrossSceneData.Instance.GetActiveControllers() == null) {
+    protected override void Awake()
+    {
+        Instantiate(audioFollowListener);
+        base.Awake();
+    }
+
+    void Start() {
+        if (CrossSceneData.Instance.GetActiveControllers() == null) {
 			StartGame(new List<PlayerData>() { new PlayerData(1, Color.red, "RED") }, true, false, false);
 		}
 		else{
@@ -44,8 +55,17 @@ public class GameHandler : Singleton<GameHandler> {
 	}
 
     void InitAudio() {
+        if (simultaneous || FFA)
+        {
+            otherModeAudioSourceBG.clip = ffaBG;
+            otherModeAudioSourceBG.Play();
+            otherModeAudioSourceBG.volume = standardBGVolume;
+            return;
+        }
+
         audioSources = GetComponents<AudioSource>();
         int i = 0;
+        Debug.Log("here");
         foreach (var player in players)
         {
             player.audioSource = audioSources[i];
@@ -54,13 +74,11 @@ public class GameHandler : Singleton<GameHandler> {
             player.audioSource.volume = 0;
             i++;
         }
-		if (simultaneous || FFA) {
-			Camera.main.gameObject.AddComponent<AudioListener>();
-		}
     }
 
     public void StartGame(List<PlayerData> playerNums, bool faked = false, bool sim = false, bool ffa = false) {
-		simultaneous = sim;
+        
+        simultaneous = sim;
 		FFA = ffa;
 		players = playerNums;
 		currentPlayer = 0;
@@ -85,9 +103,10 @@ public class GameHandler : Singleton<GameHandler> {
 	}
 
     public void MuteCurrentPlayerMusic() {
-		if (!simultaneous && !FFA) {
-			players[currentPlayer].audioSource.volume = 0;
-		}
+        if (!simultaneous && !FFA)
+        {
+            players[currentPlayer].audioSource.volume = 0;
+        }
     }
 
 	public void PlayerGotKilled(PlayerController cont) {
@@ -122,10 +141,11 @@ public class GameHandler : Singleton<GameHandler> {
 			Destroy(temp.GetComponent<AudioListener>());
 		}
 		InputController.instance.AssignNewPlayer(players[currentPlayer].ID, temp.GetComponent<PlayerController>());
-        if (previousPlayer != null)
-            previousPlayer.audioSource.volume = 0;
-        players[currentPlayer].audioSource.volume = standardBGVolume;
-       
+        if(!simultaneous && !FFA) { 
+            if (previousPlayer != null)
+                previousPlayer.audioSource.volume = 0;
+            players[currentPlayer].audioSource.volume = standardBGVolume;
+        }
         previousPlayer = players[currentPlayer];
 		alivePlayers++;
     }
@@ -133,14 +153,13 @@ public class GameHandler : Singleton<GameHandler> {
 	IEnumerator SpawnPlayerByID(int id) {
 		yield return new WaitForSeconds(values.respawnTimerFFAMode);
 		GameObject temp = Instantiate(avatars[id - 1], playerReachedCheckpoint.Contains(players[currentPlayer].ID) ? checkpoint.position : spawnPoint.position, Quaternion.identity) as GameObject;
-		if (simultaneous || FFA) {
-			Destroy(temp.GetComponent<AudioListener>());
-		}
-		InputController.instance.AssignNewPlayer(id, temp.GetComponent<PlayerController>());
-		if (previousPlayer != null)
-			previousPlayer.audioSource.volume = 0;
-		players[currentPlayer].audioSource.volume = standardBGVolume;
-
+        if (!simultaneous && !FFA)
+        {
+            InputController.instance.AssignNewPlayer(id, temp.GetComponent<PlayerController>());
+            if (previousPlayer != null)
+                previousPlayer.audioSource.volume = 0;
+            players[currentPlayer].audioSource.volume = standardBGVolume;
+        }
 		previousPlayer = players[currentPlayer];
 		alivePlayers++;
 	}
@@ -173,6 +192,9 @@ public class GameHandler : Singleton<GameHandler> {
 					ui.PlayerUsedFuckYou(p.ID, p.name, p.color,powerUpID, p);
                     //TODO: Add FUCK YOU power up sound when used
                     p.powerUp[powerUpID].UsePowerUp(currentPlayer);
+                    var source = Camera.main.GetComponent<AudioSource>();
+                    source.clip = powerUpClip;
+                    source.Play();
 					return;
 				}
 			}
