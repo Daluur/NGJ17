@@ -62,7 +62,7 @@ public class InputController : Singleton<InputController> {
 			}
 			if (Input.GetButtonDown("Joy" + i + "Jump")) {
 				Debug.Log("Not active player: "+i+" Pressed fuck you button");
-                GameHandler.instance.CanUseFuckYouPower(i);
+                GameHandler.instance.CanUseFuckYouPower(i, currentPlayer);
 			}
 		}
 	}

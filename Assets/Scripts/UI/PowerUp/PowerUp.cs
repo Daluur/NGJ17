@@ -4,14 +4,14 @@ using UnityEngine;
 
 public abstract class PowerUp {
 
-    public GameObject currentPlayer;
+    public PlayerController currentPlayer;
     public float powerUpDuration = FuckYouConstants.DURATIONINSECONDS;
 
-    public void SetCurrentPlayer(GameObject currPlayer) {
+    public void SetCurrentPlayer(PlayerController currPlayer) {
         currentPlayer = currPlayer;
     }
 
-    public virtual void UsePowerUp() {
+    public virtual void UsePowerUp(PlayerController player) {
         Debug.LogError("Implementation missing for this power up");
     }
 }

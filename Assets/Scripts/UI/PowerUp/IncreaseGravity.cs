@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class IncreaseGravity : PowerUp {
     public float gravityModifier = FuckYouConstants.GRAVITYMODIFIER;
-    public override void UsePowerUp()
+    public override void UsePowerUp(PlayerController player)
     {
+		SetCurrentPlayer(player);
         GameHandler.instance.StartCoroutine(GravityModifier());
     }
 
-    IEnumerator GravityModifier() {
+    public IEnumerator GravityModifier() {
         var currPlayerRigid = currentPlayer.GetComponent<Rigidbody2D>();
         var prevGravity = currPlayerRigid.gravityScale;
         currPlayerRigid.gravityScale *= gravityModifier;

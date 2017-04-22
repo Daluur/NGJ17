@@ -57,7 +57,7 @@ public class GameHandler : Singleton<GameHandler> {
 		InputController.instance.AssignNewPlayer(players[currentPlayer].ID, temp.GetComponent<PlayerController>());
 	}
 
-	public void CanUseFuckYouPower(int id) {
+	public void CanUseFuckYouPower(int id, PlayerController currentPlayer) {
 		foreach (var p in players) {
 			if(p.ID == id) {
 				if (p.usedFuckYouPower) {
@@ -66,7 +66,7 @@ public class GameHandler : Singleton<GameHandler> {
 				else {
 					p.usedFuckYouPower = true;
 					ui.PlayerUsedFuckYou(p.ID);
-                    p.powerUp.UsePowerUp();
+                    p.powerUp.UsePowerUp(currentPlayer);
 					return;
 				}
 			}
