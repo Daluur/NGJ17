@@ -124,7 +124,7 @@ public sealed class PlayerController : MonoBehaviour
         float normalAngle;
         float move;
         float acceleration;
-        if (_grounded)
+        if (_grounded || transform.parent != null)
         {
             normalAngle = Vector2.Angle(Vector2.up, _contactNormal);
             move = MoveDirection * groundSpeed;
@@ -168,7 +168,7 @@ public sealed class PlayerController : MonoBehaviour
         var body2D = GetComponent<Rigidbody2D>();
         var momentum = body2D.velocity;
         var jump = Vector2.zero;
-        if (_lastGroundedTime + inputJumpLateBias > Time.timeSinceLevelLoad)
+        if (_lastGroundedTime + inputJumpLateBias > Time.timeSinceLevelLoad || transform.parent != null)
         {
             jump = Vector2.up * groundJumpSpeed;
             ResetJump();
