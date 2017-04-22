@@ -17,6 +17,8 @@ public class CrossSceneData {
 		}
 	}
 
+	List<PlayerData> playerInfo = new List<PlayerData>();
+
 	List<int> activeControllers;
 
 	public List<int> GetActiveControllers() {
@@ -25,6 +27,28 @@ public class CrossSceneData {
 
 	public void SetActiveControllers(List<int> conts) {
 		activeControllers = conts;
+		playerInfo.Clear();
+		foreach (int i in activeControllers) {
+			playerInfo.Add(new PlayerData(i, colors[i-1]));
+		}
+	}	
+
+	public List<PlayerData> GetPlayerData() {
+		return playerInfo;
 	}
-	
+
+	public Color[] colors = new Color[] { Color.red, Color.yellow, Color.green, Color.blue };
+}
+
+public class PlayerData {
+	public int ID;
+	public bool usedFuckYouPower = false;
+	public Color color;
+    public PowerUp powerUp;
+
+	public PlayerData(int i, Color col) {
+		ID = i;
+		color = col;
+        powerUp = new IncreaseGravity();
+	}
 }
