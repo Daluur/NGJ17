@@ -44,7 +44,13 @@ public sealed class PlayerController : MonoBehaviour
             return;
         }
         _dead = true;
-        GameHandler.instance.PlayerGotKilled();
+		if(GameHandler.instance != null) {
+			GameHandler.instance.PlayerGotKilled();
+		}
+		else {
+			LobbySceneBackground.instance.GotKill();
+		}
+        
         var ps = GetComponentInChildren<ParticleSystem>();
         ps.transform.parent = null;
         ps.Play();
