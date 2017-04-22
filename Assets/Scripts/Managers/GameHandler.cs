@@ -10,6 +10,11 @@ public class GameHandler : Singleton<GameHandler> {
 
 	public GameObject[] avatars;
 
+    public float standardBGVolume = 0.5f;
+
+    private PlayerData previousPlayer;
+    private AudioSource[] audioSources;
+
 	public Transform spawnPoint;
 
 	public GameObject UIObjectprefab;
@@ -18,7 +23,8 @@ public class GameHandler : Singleton<GameHandler> {
 	bool gameFinished = false;
 
 	void Start() {
-		if(CrossSceneData.Instance.GetActiveControllers() == null) {
+
+        if (CrossSceneData.Instance.GetActiveControllers() == null) {
 			StartGame(new List<PlayerData>() { new PlayerData(1, Color.red) }, true);
 		}
 		else{
@@ -26,10 +32,31 @@ public class GameHandler : Singleton<GameHandler> {
 		}
 		ui = Instantiate(UIObjectprefab).GetComponent<UIHandler>();
 		ui.Setup(players);
+       
 		ui.NewPlayersTurn(players[currentPlayer].ID);
 	}
 
-	public void StartGame(List<PlayerData> playerNums, bool faked = false) {
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.O)) {
+            PlayerGotKilled();
+        }
+    }
+
+    void InitAudio() {
+        audioSources = GetComponents<AudioSource>();
+        int i = 0;
+        foreach (var player in players)
+        {
+            player.audioSource = audioSources[i];
+            player.audioSource.clip = avatars[i].GetComponent<SoundHolder>().playerBG;
+            player.audioSource.Play();
+            player.audioSource.volume = 0;
+            i++;
+        }
+    }
+
+    public void StartGame(List<PlayerData> playerNums, bool faked = false) {
 		players = playerNums;
 		currentPlayer = 0;
 		List<int> i = new List<int>();
@@ -37,11 +64,17 @@ public class GameHandler : Singleton<GameHandler> {
 			i.Add(player.ID);
 		}
 		InputController.instance.Setup(i, faked);
-		SpawnPlayer();
+        InitAudio();
+        SpawnPlayer();
 	}
 
+    public void MuteCurrentPlayerMusic() {
+        players[currentPlayer].audioSource.volume = 0;
+    }
+
 	public void PlayerGotKilled() {
-		if (gameFinished) {
+
+        if (gameFinished) {
 			return;
 		}
 		currentPlayer++;
@@ -55,7 +88,12 @@ public class GameHandler : Singleton<GameHandler> {
 	void SpawnPlayer() {
 		GameObject temp = Instantiate(avatars[players[currentPlayer].ID-1], spawnPoint.position, Quaternion.identity) as GameObject;
 		InputController.instance.AssignNewPlayer(players[currentPlayer].ID, temp.GetComponent<PlayerController>());
-	}
+        if (previousPlayer != null)
+            previousPlayer.audioSource.volume = 0;
+        players[currentPlayer].audioSource.volume = standardBGVolume;
+       
+        previousPlayer = players[currentPlayer];
+    }
 
 	public void CanUseFuckYouPower(int id, PlayerController currentPlayer) {
 		foreach (var p in players) {
@@ -66,6 +104,7 @@ public class GameHandler : Singleton<GameHandler> {
 				else {
 					p.usedFuckYouPower = true;
 					ui.PlayerUsedFuckYou(p.ID);
+                    //TODO: Add FUCK YOU power up sound when used
                     p.powerUp.UsePowerUp(currentPlayer);
 					return;
 				}
