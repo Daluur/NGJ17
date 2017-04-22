@@ -65,7 +65,7 @@ public sealed class PlayerController : MonoBehaviour
         }
         _dead = true;
 		if(GameHandler.instance != null) {
-			GameHandler.instance.PlayerGotKilled();
+			GameHandler.instance.PlayerGotKilled(this);
 		}
 		else {
 			LobbySceneBackground.instance.GotKill();
