@@ -6,7 +6,8 @@ using UnityEngine.SceneManagement;
 public class ControllerAssigning : MonoBehaviour {
 
 	List<int> activeControllers = new List<int>();
-	public GameObject[] avatars;
+	public LobbyPlayer[] avatars;
+	public GameObject readyToStart;
 
 	// Update is called once per frame
 	void Update () {
@@ -41,10 +42,16 @@ public class ControllerAssigning : MonoBehaviour {
 	}
 
 	void ShowAvatar(int id) {
-		avatars[id-1].SetActive(true);
+		avatars[id-1].Assign();
+		if(activeControllers.Count > 0) {
+			readyToStart.SetActive(true);
+		}
 	}
 
 	void RemoveAvatar(int id) {
-		avatars[id-1].SetActive(false);
+		avatars[id-1].UnAssign();
+		if (activeControllers.Count == 0) {
+			readyToStart.SetActive(false);
+		}
 	}
 }

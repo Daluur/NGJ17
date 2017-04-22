@@ -47,10 +47,10 @@ public class InputController : Singleton<InputController> {
 
 	void GetJoystickInput() {
 		if (Input.GetButtonDown("Joy" + currentPlayerID + "Jump")) {
-			Debug.Log("Jump down: " + currentPlayerID);
+			currentPlayer.Jumping = true;
 		}
 		if (Input.GetButtonUp("Joy" + currentPlayerID + "Jump")) {
-			Debug.Log("Jump up: " + currentPlayerID);
+			currentPlayer.Jumping = false;
 		}
 		currentPlayer.MoveDirection = Input.GetAxis("Joy" + currentPlayerID + "X");
 	}
@@ -90,10 +90,10 @@ public class InputController : Singleton<InputController> {
 				}
 			}
 			if (Input.GetButtonDown("Joy" + i + "Jump")) {
-				Debug.Log("Jump down: " + i);
+				currentPlayer.Jumping = true;
 			}
 			if (Input.GetButtonUp("Joy" + i + "Jump")) {
-				Debug.Log("Jump up: " + i);
+				currentPlayer.Jumping = false;
 			}
 			moveDir += Input.GetAxis("Joy" + i + "X");
 		}
@@ -115,6 +115,7 @@ public class InputController : Singleton<InputController> {
 			direction += 1f;
 		}
 		currentPlayer.MoveDirection = direction;
+        currentPlayer.Jumping = Input.GetKey(KeyCode.W);
 	}
 
 	/*foreach (int i in activeControllers) {

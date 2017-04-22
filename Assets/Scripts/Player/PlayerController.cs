@@ -2,15 +2,29 @@
 
 public sealed class PlayerController : MonoBehaviour
 {
-    public float moveSpeed;
-    public float moveAcceleration;
     [HideInInspector]
     public AudioClip deathClip;
 
     private SoundHolder soundHolder;
     private AudioSource myAudioSource;
 
-	bool dead = false;
+    private const int MAX_CONTACTS = 4;
+
+
+    public float moveSpeed = 1f;
+    public float jumpSpeed = 10f;
+    public float moveAcceleration = 1f;
+    public float inputJumpEarlyBias = 0.1f;
+    public float inputJumpLateBias = 0.1f;
+    public float jumpOvertimes = 1f;
+    public float groundAngle = 90;
+
+    private bool _grounded;
+    private bool _dead;
+    private bool _jumping;
+    private float _moveDirection;
+    private float _jumpInputTime = float.NegativeInfinity;
+    private Vector2 _groundNormal;
 
     public float MoveDirection
     {
@@ -18,7 +32,38 @@ public sealed class PlayerController : MonoBehaviour
         set { _moveDirection = Mathf.Clamp(value, -1, 1); }
     }
 
-    private float _moveDirection;
+    public bool Jumping
+    {
+        get { return _jumping; }
+        set
+        {
+            if (!_jumping && value)
+            {
+                _jumpInputTime = Time.timeSinceLevelLoad;
+            }
+            _jumping = value;
+        }
+    }
+
+    public void Kill()
+    {
+        if (_dead)
+        {
+            return;
+        }
+        _dead = true;
+		if(GameHandler.instance != null) {
+			GameHandler.instance.PlayerGotKilled();
+		}
+		else {
+			LobbySceneBackground.instance.GotKill();
+		}
+        
+        var ps = GetComponentInChildren<ParticleSystem>();
+        ps.transform.parent = null;
+        ps.Play();
+        Destroy(gameObject);
+    }
 
     private void OnValidate()
     {
@@ -31,24 +76,39 @@ public sealed class PlayerController : MonoBehaviour
         myAudioSource = GetComponent<AudioSource>();
     }
 
-	// Update is called once per frame
-	private void FixedUpdate()
+    // Update is called once per frame
+    private void FixedUpdate()
+    {
+        UpdateGrounded();
+        UpdateMove();
+        UpdateJump();
+    }
+
+    private void UpdateMove()
     {
         var body2D = GetComponent<Rigidbody2D>();
 
-        // Move
-        var move = body2D.velocity.x;
-        if (Mathf.Sign(move) != Mathf.Sign(MoveDirection))
+        var momentum = body2D.velocity;
+        var normal = _groundNormal;
+        var normalAngle = Vector2.Angle(Vector2.up, normal);
+        if (normal.x < 0)
         {
-            move = 0f;
+            normalAngle = -normalAngle;
         }
-        var acc = moveAcceleration * Time.fixedTime;
 
-        if (Mathf.Abs(move) > 0.6f)
+        var directedMomentum = Rotate(momentum, normalAngle);
+
+        var move = MoveDirection * moveSpeed;
+        var acceleration = moveAcceleration * Time.fixedTime;
+
+        var directedMoveX = Mathf.MoveTowards(momentum.x, move, acceleration);
+
+        var directedVelocity = new Vector2(directedMoveX, directedMomentum.y);
+        body2D.velocity = Rotate(directedVelocity, -normalAngle);
+
+        if (Mathf.Abs(directedMoveX) > 0.6f)
             RunningSound();
 
-        move = Mathf.MoveTowards(move, MoveDirection * moveSpeed, acc);
-        
         body2D.velocity = new Vector2(move, body2D.velocity.y);
         
     }
@@ -66,24 +126,69 @@ public sealed class PlayerController : MonoBehaviour
 
     }
 
-    public void Kill() {
+  /*  public void Kill() {
 		if (dead) {
 			return;
 		}
 
-       /* if (deathClip == null) {
+        if (deathClip == null) {
             deathClip = soundHolder.death;
         }
 
         GameHandler.instance.MuteCurrentPlayerMusic();
         myAudioSource.clip = deathClip;
         myAudioSource.Play();
-        */
+        
         dead = true;
 		GameHandler.instance.PlayerGotKilled();
         var ps = GetComponentInChildren<ParticleSystem>();
         ps.transform.parent = null;
         ps.Play();
 		Destroy(gameObject);
-	}
+	}*/
+
+    private void UpdateJump()
+    {
+        if (_grounded &&
+            _jumpInputTime + inputJumpEarlyBias >= Time.timeSinceLevelLoad)
+        {
+            var body2D = GetComponent<Rigidbody2D>();
+            body2D.velocity = new Vector2(body2D.velocity.x, jumpSpeed);
+        }
+    }
+
+    private void UpdateGrounded()
+    {
+        _grounded = false;
+        _groundNormal = Vector2.up;
+        var collider = GetComponent<BoxCollider2D>();
+        var contacts = new ContactPoint2D[MAX_CONTACTS];
+        var contactAmount = collider.GetContacts(contacts);
+        if (contactAmount == 0)
+        {
+            return;
+        }
+        for (var i = 0; i < contactAmount; i++)
+        {
+            var contactPoint = contacts[i];
+            var angle = Vector2.Angle(Vector2.up, contactPoint.normal);
+            if (angle < groundAngle)
+            {
+                _groundNormal = contactPoint.normal;
+                _grounded = true;
+            }
+        }
+    }
+
+    private static Vector2 Rotate(Vector2 v, float degrees)
+    {
+        float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
+        float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
+
+        float tx = v.x;
+        float ty = v.y;
+        v.x = (cos * tx) - (sin * ty);
+        v.y = (sin * tx) + (cos * ty);
+        return v;
+    }
 }
