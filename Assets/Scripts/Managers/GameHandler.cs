@@ -16,6 +16,9 @@ public class GameHandler : Singleton<GameHandler> {
     private AudioSource[] audioSources;
 
 	public Transform spawnPoint;
+	public Transform checkpoint;
+
+	List<int> playerReachedCheckpoint = new List<int>();
 
 	public GameObject UIObjectprefab;
 	UIHandler ui;
@@ -114,7 +117,7 @@ public class GameHandler : Singleton<GameHandler> {
 	}
 
 	void SpawnPlayer() {
-		GameObject temp = Instantiate(avatars[players[currentPlayer].ID-1], spawnPoint.position, Quaternion.identity) as GameObject;
+		GameObject temp = Instantiate(avatars[players[currentPlayer].ID-1], playerReachedCheckpoint.Contains(players[currentPlayer].ID) ? checkpoint.position : spawnPoint.position, Quaternion.identity) as GameObject;
 		if (simultaneous || FFA) {
 			Destroy(temp.GetComponent<AudioListener>());
 		}
@@ -129,7 +132,7 @@ public class GameHandler : Singleton<GameHandler> {
 
 	IEnumerator SpawnPlayerByID(int id) {
 		yield return new WaitForSeconds(values.respawnTimerFFAMode);
-		GameObject temp = Instantiate(avatars[id - 1], spawnPoint.position, Quaternion.identity) as GameObject;
+		GameObject temp = Instantiate(avatars[id - 1], playerReachedCheckpoint.Contains(players[currentPlayer].ID) ? checkpoint.position : spawnPoint.position, Quaternion.identity) as GameObject;
 		if (simultaneous || FFA) {
 			Destroy(temp.GetComponent<AudioListener>());
 		}
@@ -195,6 +198,13 @@ public class GameHandler : Singleton<GameHandler> {
 		}
 		returningToCharSelect = true;
 		SceneManager.LoadScene(0);
+	}
+
+	public void PlayerHitCheckpoint(PlayerController cont) {
+		int i = InputController.instance.GetIDFromController(cont);
+		if (!playerReachedCheckpoint.Contains(i)) {
+			playerReachedCheckpoint.Add(i);
+		}
 	}
 }
 
