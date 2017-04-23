@@ -22,6 +22,9 @@ public class IncreaseGravity : PowerUp {
     }
 
     public IEnumerator GravityModifier() {
+		if(currentPlayer == null) {
+			yield break;
+		}
         var currPlayerRigid = currentPlayer.GetComponent<Rigidbody2D>();
         var prevGravity = currPlayerRigid.gravityScale;
         currPlayerRigid.gravityScale *= gravityModifier;

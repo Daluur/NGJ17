@@ -21,6 +21,7 @@ public class CrossSceneData {
 
 	public bool simultaneous = false;
 	public bool FFA = false;
+	public bool controller = true;
 
 	List<int> activeControllers;
 
