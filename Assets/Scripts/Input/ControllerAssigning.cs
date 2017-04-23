@@ -12,6 +12,8 @@ public class ControllerAssigning : MonoBehaviour {
 	int map = 1;
 
 	bool controller = true;
+	public GameObject controllerDescription;
+	public GameObject keyboardDescription;
 
 	private void Start() {
 		ModeToggle(0);
@@ -154,12 +156,16 @@ public class ControllerAssigning : MonoBehaviour {
 				avatars[i].SetInputTypeAsController();
 			}
 			readyToStart.GetComponent<Text>().text = "Press 'Start' to start!";
+			controllerDescription.SetActive(true);
+			keyboardDescription.SetActive(false);
 		}
 		else {
 			for (int i = 0; i < avatars.Length; i++) {
 				avatars[i].SetInputTypeAsKeyboard(i);
 			}
 			readyToStart.GetComponent<Text>().text = "Press 'Enter' to start!";
+			controllerDescription.SetActive(false);
+			keyboardDescription.SetActive(true);
 		}
 	}
 
