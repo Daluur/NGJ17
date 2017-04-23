@@ -18,13 +18,16 @@ public class ParticleCollision : MonoBehaviour
     private ParticleSystem ps;
     public GameObject splatter;
     private List<ParticleHolder> particleHolder = new List<ParticleHolder>();
+    private int sortOrderIncrement;
 
-    void Start() {
+    void Start()
+    {
         ps = GetComponent<ParticleSystem>();
     }
 
     public void ActivateParticleSystem() {
         ps.transform.parent = null;
+        sortOrderIncrement = IncrementerForParticles.GetCurrentAndIncrement();
         ps.Play();
         Destroy(gameObject, ps.main.startLifetime.constant);
     }
@@ -43,7 +46,7 @@ public class ParticleCollision : MonoBehaviour
                 Destroy(go);
                 continue;
             }
-            go.GetComponent<SpriteRenderer>().sortingOrder = toParent.GetComponent<SpriteRenderer>().sortingOrder + IncrementerForParticles.GetCurrentAndIncrement();
+            go.GetComponent<SpriteRenderer>().sortingOrder = toParent.GetComponent<SpriteRenderer>().sortingOrder + sortOrderIncrement;
             go.GetComponent<SpriteRenderer>().sortingLayerName = toParent.GetComponent<SpriteRenderer>().sortingLayerName;
             go.layer = go.transform.parent.gameObject.layer;
         }
