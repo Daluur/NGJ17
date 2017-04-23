@@ -231,6 +231,7 @@ public sealed class PlayerController : MonoBehaviour
             if (isJumpFlag)
             {
                 _jumpOvertimeTime = time;
+                JumpingSound();
             }
         }
         else if (_lastClimbingTime + inputJumpLateBias > Time.timeSinceLevelLoad && isJumpFlag)
@@ -240,10 +241,10 @@ public sealed class PlayerController : MonoBehaviour
             if (isJumpFlag)
             {
                 _jumpOvertimeTime = time;
+                JumpingSound();
             }
         }
         body2D.velocity = jump;
-        JumpingSound();
     }
 
     private void ResetJump()
