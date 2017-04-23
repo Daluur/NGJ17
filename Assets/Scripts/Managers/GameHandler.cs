@@ -257,6 +257,7 @@ public static class IncrementerForParticles {
     private static bool locked;
     public static int GetCurrentAndIncrement()
     {
+        /*
         if (locked)
             return currentIncrement;
         locked = true;
@@ -268,6 +269,8 @@ public static class IncrementerForParticles {
 			GameHandler.instance.StartCoroutine(CoolDown());
 		}
         return currentIncrement;
+        */
+        return currentIncrement++;
     }
     public static IEnumerator CoolDown() {
         yield return new WaitForSeconds(ParticleSystemConstants.TIMEBEFOREDESTRUCTION);
