@@ -11,7 +11,7 @@ public class GameHandler : Singleton<GameHandler> {
 	public GameObject[] avatars;
     public GameObject audioFollowListener;
 
-    public float standardBGVolume = 0.3f;
+    public float standardBGVolume = 0.6f;
 
     private PlayerData previousPlayer;
     private AudioSource[] audioSources;
