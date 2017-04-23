@@ -8,6 +8,7 @@ public class UIHandler : MonoBehaviour {
 	public PlayerPanel[] panels;
 	public Text WonText;
 	public Text powerUpText;
+    public TimerBar timerBar;
 
 	public void Setup(List<PlayerData> activePlayers) {
 		foreach (var i in activePlayers) {
@@ -18,6 +19,7 @@ public class UIHandler : MonoBehaviour {
 
 	public void PlayerUsedFuckYou(int i, string name, Color col, int powerUpID, PlayerData player) {
         powerUpText.gameObject.SetActive(true);
+        timerBar.ShowProgressBar(col);
 		powerUpText.text = name + player.powerUp[powerUpID].displayText;
 		StartCoroutine(Fade(powerUpText, 2, col));
 		panels[i - 1].UsedFuckYou(powerUpID);
