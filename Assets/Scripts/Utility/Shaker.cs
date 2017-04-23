@@ -9,7 +9,7 @@ public class Shaker : MonoBehaviour {
 	}
 
 	float duration = 1;
-	float magnitude = 0.1f;
+	float magnitude = 0.2f;
 
 	IEnumerator Shake() {
 
