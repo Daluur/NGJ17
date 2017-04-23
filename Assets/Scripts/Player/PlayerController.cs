@@ -197,15 +197,17 @@ public sealed class PlayerController : MonoBehaviour
     {
         if (!myAudioSource.isPlaying)
         { 
-        myAudioSource.clip = soundHolder.running;
-        myAudioSource.Play();
-        myAudioSource.volume = 1;
+            myAudioSource.clip = soundHolder.running;
+            myAudioSource.Play();
+            myAudioSource.volume = 1;
         }
     }
 
     private void JumpingSound()
     {
-
+        myAudioSource.clip = soundHolder.jumping;
+        myAudioSource.Play();
+        myAudioSource.volume = 1;
     }
 
     private void UpdateJump()
@@ -229,6 +231,7 @@ public sealed class PlayerController : MonoBehaviour
             if (isJumpFlag)
             {
                 _jumpOvertimeTime = time;
+                JumpingSound();
             }
         }
         else if (_lastClimbingTime + inputJumpLateBias > Time.timeSinceLevelLoad && isJumpFlag)
@@ -238,6 +241,7 @@ public sealed class PlayerController : MonoBehaviour
             if (isJumpFlag)
             {
                 _jumpOvertimeTime = time;
+                JumpingSound();
             }
         }
         body2D.velocity = jump;

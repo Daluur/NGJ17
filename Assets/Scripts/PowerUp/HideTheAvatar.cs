@@ -23,6 +23,9 @@ public class HideTheAvatar : PowerUp {
 
     public IEnumerator TimedPowerUp(PlayerController player) {
         isRunning = true;
+		if(player == null) {
+			yield break;
+		}
         player.GetComponent<SpriteRenderer>().enabled = false;
         yield return new WaitForSeconds(FuckYouConstants.DURATIONINSECONDS);
         if(player!=null)
