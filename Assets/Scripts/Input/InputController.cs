@@ -130,18 +130,6 @@ public class InputController : Singleton<InputController> {
 			if (Input.GetButtonUp("Joy" + i + "Jump")) {
 				currentPlayer[currentPlayerID].Jumping = false;
 			}
-            if (Input.GetButtonDown("Joy" + i + "RightButton"))
-            {
-                Debug.Log("Hit button " + i);
-            }
-            if (Input.GetButtonDown("Joy" + i + "UpperButton"))
-            {
-                Debug.Log("Hit button " + i);
-            }
-            if (Input.GetButtonDown("Joy" + i + "LeftButton"))
-            {
-                Debug.Log("Hit button " + i);
-            }
             moveDir += Input.GetAxis("Joy" + i + "X");
 		}
 		currentPlayer[currentPlayerID].MoveDirection = moveDir;
@@ -286,19 +274,4 @@ public class InputController : Singleton<InputController> {
 		}
 		return 1;
 	}
-
-	/*foreach (int i in activeControllers) {
-		if(currentPlayerID !=   i) {
-			if (!startedInGameScene) {
-				continue;
-			}
-		}
-		if (Input.GetButtonDown("Joy" + i + "Jump")) {
-			Debug.Log("Jump down: " + i);
-		}
-		if (Input.GetButtonUp("Joy" + i + "Jump")) {
-			Debug.Log("Jump up: " + i);
-		}
-		currentPlayer.MoveDirection = Input.GetAxis("Joy" + i + "X");
-	}*/
 }

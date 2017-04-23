@@ -21,7 +21,6 @@ public class TimerBar : MonoBehaviour
         isRunning = true;
         var target = 1;
         var current = 0f;
-        Debug.Log(Time.timeSinceLevelLoad);
         while (fillAmount < target) {
             
             yield return new WaitForFixedUpdate();
