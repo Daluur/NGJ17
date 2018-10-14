@@ -51,7 +51,7 @@ public class GameHandler : Singleton<GameHandler> {
 			StartGame(CrossSceneData.Instance.GetPlayerData(),false , CrossSceneData.Instance.simultaneous, CrossSceneData.Instance.FFA);
 		}
 		ui = Instantiate(UIObjectprefab).GetComponent<UIHandler>();
-		ui.Setup(players);
+		// ui.Setup(players);
 		if (!simultaneous && !FFA) { 
 			ui.NewPlayersTurn(players[currentPlayer].ID);
 		}
